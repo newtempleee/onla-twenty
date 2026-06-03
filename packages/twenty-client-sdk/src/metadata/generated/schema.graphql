@@ -2131,6 +2131,62 @@ type FieldConnection {
   edges: [FieldEdge!]!
 }
 
+type LogicFunctionLogs {
+  """Execution Logs"""
+  logs: String!
+}
+
+type Webhook {
+  id: UUID!
+  targetUrl: String!
+  operations: [String!]!
+  description: String
+  secret: String!
+  applicationId: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}
+
+type ToolIndexEntry {
+  name: String!
+  description: String!
+  category: String!
+  objectName: String
+  icon: String
+  inputSchema: JSON
+}
+
+type AgentMessagePart {
+  id: UUID!
+  messageId: UUID!
+  orderIndex: Int!
+  type: String!
+  textContent: String
+  reasoningContent: String
+  toolName: String
+  toolCallId: String
+  toolInput: JSON
+  toolOutput: JSON
+  state: String
+  providerExecuted: Boolean
+  errorMessage: String
+  errorDetails: JSON
+  sourceUrlSourceId: String
+  sourceUrlUrl: String
+  sourceUrlTitle: String
+  sourceDocumentSourceId: String
+  sourceDocumentMediaType: String
+  sourceDocumentTitle: String
+  sourceDocumentFilename: String
+  fileMediaType: String
+  fileFilename: String
+  fileId: UUID
+  fileUrl: String
+  providerMetadata: JSON
+  createdAt: DateTime!
+}
+
 type ResendEmailVerificationToken {
   success: Boolean!
 }
@@ -2230,11 +2286,6 @@ type DomainValidRecords {
 type UpsertRowLevelPermissionPredicatesResult {
   predicates: [RowLevelPermissionPredicate!]!
   predicateGroups: [RowLevelPermissionPredicateGroup!]!
-}
-
-type LogicFunctionLogs {
-  """Execution Logs"""
-  logs: String!
 }
 
 type DeleteTwoFactorAuthenticationMethod {
@@ -2475,57 +2526,6 @@ type ConnectedImapSmtpCaldavAccount {
 type ImapSmtpCaldavConnectionSuccess {
   success: Boolean!
   connectedAccountId: String!
-}
-
-type Webhook {
-  id: UUID!
-  targetUrl: String!
-  operations: [String!]!
-  description: String
-  secret: String!
-  applicationId: UUID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  deletedAt: DateTime
-}
-
-type ToolIndexEntry {
-  name: String!
-  description: String!
-  category: String!
-  objectName: String
-  icon: String
-  inputSchema: JSON
-}
-
-type AgentMessagePart {
-  id: UUID!
-  messageId: UUID!
-  orderIndex: Int!
-  type: String!
-  textContent: String
-  reasoningContent: String
-  toolName: String
-  toolCallId: String
-  toolInput: JSON
-  toolOutput: JSON
-  state: String
-  providerExecuted: Boolean
-  errorMessage: String
-  errorDetails: JSON
-  sourceUrlSourceId: String
-  sourceUrlUrl: String
-  sourceUrlTitle: String
-  sourceDocumentSourceId: String
-  sourceDocumentMediaType: String
-  sourceDocumentTitle: String
-  sourceDocumentFilename: String
-  fileMediaType: String
-  fileFilename: String
-  fileId: UUID
-  fileUrl: String
-  providerMetadata: JSON
-  createdAt: DateTime!
 }
 
 type ChannelSyncSuccess {

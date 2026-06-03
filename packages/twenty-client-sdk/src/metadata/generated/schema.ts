@@ -1762,6 +1762,66 @@ export interface FieldConnection {
     __typename: 'FieldConnection'
 }
 
+export interface LogicFunctionLogs {
+    /** Execution Logs */
+    logs: Scalars['String']
+    __typename: 'LogicFunctionLogs'
+}
+
+export interface Webhook {
+    id: Scalars['UUID']
+    targetUrl: Scalars['String']
+    operations: Scalars['String'][]
+    description?: Scalars['String']
+    secret: Scalars['String']
+    applicationId: Scalars['UUID']
+    createdAt: Scalars['DateTime']
+    updatedAt: Scalars['DateTime']
+    deletedAt?: Scalars['DateTime']
+    __typename: 'Webhook'
+}
+
+export interface ToolIndexEntry {
+    name: Scalars['String']
+    description: Scalars['String']
+    category: Scalars['String']
+    objectName?: Scalars['String']
+    icon?: Scalars['String']
+    inputSchema?: Scalars['JSON']
+    __typename: 'ToolIndexEntry'
+}
+
+export interface AgentMessagePart {
+    id: Scalars['UUID']
+    messageId: Scalars['UUID']
+    orderIndex: Scalars['Int']
+    type: Scalars['String']
+    textContent?: Scalars['String']
+    reasoningContent?: Scalars['String']
+    toolName?: Scalars['String']
+    toolCallId?: Scalars['String']
+    toolInput?: Scalars['JSON']
+    toolOutput?: Scalars['JSON']
+    state?: Scalars['String']
+    providerExecuted?: Scalars['Boolean']
+    errorMessage?: Scalars['String']
+    errorDetails?: Scalars['JSON']
+    sourceUrlSourceId?: Scalars['String']
+    sourceUrlUrl?: Scalars['String']
+    sourceUrlTitle?: Scalars['String']
+    sourceDocumentSourceId?: Scalars['String']
+    sourceDocumentMediaType?: Scalars['String']
+    sourceDocumentTitle?: Scalars['String']
+    sourceDocumentFilename?: Scalars['String']
+    fileMediaType?: Scalars['String']
+    fileFilename?: Scalars['String']
+    fileId?: Scalars['UUID']
+    fileUrl?: Scalars['String']
+    providerMetadata?: Scalars['JSON']
+    createdAt: Scalars['DateTime']
+    __typename: 'AgentMessagePart'
+}
+
 export interface ResendEmailVerificationToken {
     success: Scalars['Boolean']
     __typename: 'ResendEmailVerificationToken'
@@ -1870,12 +1930,6 @@ export interface UpsertRowLevelPermissionPredicatesResult {
     predicates: RowLevelPermissionPredicate[]
     predicateGroups: RowLevelPermissionPredicateGroup[]
     __typename: 'UpsertRowLevelPermissionPredicatesResult'
-}
-
-export interface LogicFunctionLogs {
-    /** Execution Logs */
-    logs: Scalars['String']
-    __typename: 'LogicFunctionLogs'
 }
 
 export interface DeleteTwoFactorAuthenticationMethod {
@@ -2155,60 +2209,6 @@ export interface ImapSmtpCaldavConnectionSuccess {
     success: Scalars['Boolean']
     connectedAccountId: Scalars['String']
     __typename: 'ImapSmtpCaldavConnectionSuccess'
-}
-
-export interface Webhook {
-    id: Scalars['UUID']
-    targetUrl: Scalars['String']
-    operations: Scalars['String'][]
-    description?: Scalars['String']
-    secret: Scalars['String']
-    applicationId: Scalars['UUID']
-    createdAt: Scalars['DateTime']
-    updatedAt: Scalars['DateTime']
-    deletedAt?: Scalars['DateTime']
-    __typename: 'Webhook'
-}
-
-export interface ToolIndexEntry {
-    name: Scalars['String']
-    description: Scalars['String']
-    category: Scalars['String']
-    objectName?: Scalars['String']
-    icon?: Scalars['String']
-    inputSchema?: Scalars['JSON']
-    __typename: 'ToolIndexEntry'
-}
-
-export interface AgentMessagePart {
-    id: Scalars['UUID']
-    messageId: Scalars['UUID']
-    orderIndex: Scalars['Int']
-    type: Scalars['String']
-    textContent?: Scalars['String']
-    reasoningContent?: Scalars['String']
-    toolName?: Scalars['String']
-    toolCallId?: Scalars['String']
-    toolInput?: Scalars['JSON']
-    toolOutput?: Scalars['JSON']
-    state?: Scalars['String']
-    providerExecuted?: Scalars['Boolean']
-    errorMessage?: Scalars['String']
-    errorDetails?: Scalars['JSON']
-    sourceUrlSourceId?: Scalars['String']
-    sourceUrlUrl?: Scalars['String']
-    sourceUrlTitle?: Scalars['String']
-    sourceDocumentSourceId?: Scalars['String']
-    sourceDocumentMediaType?: Scalars['String']
-    sourceDocumentTitle?: Scalars['String']
-    sourceDocumentFilename?: Scalars['String']
-    fileMediaType?: Scalars['String']
-    fileFilename?: Scalars['String']
-    fileId?: Scalars['UUID']
-    fileUrl?: Scalars['String']
-    providerMetadata?: Scalars['JSON']
-    createdAt: Scalars['DateTime']
-    __typename: 'AgentMessagePart'
 }
 
 export interface ChannelSyncSuccess {
@@ -4722,6 +4722,70 @@ export interface FieldConnectionGenqlSelection{
     __scalar?: boolean | number
 }
 
+export interface LogicFunctionLogsGenqlSelection{
+    /** Execution Logs */
+    logs?: boolean | number
+    __typename?: boolean | number
+    __scalar?: boolean | number
+}
+
+export interface WebhookGenqlSelection{
+    id?: boolean | number
+    targetUrl?: boolean | number
+    operations?: boolean | number
+    description?: boolean | number
+    secret?: boolean | number
+    applicationId?: boolean | number
+    createdAt?: boolean | number
+    updatedAt?: boolean | number
+    deletedAt?: boolean | number
+    __typename?: boolean | number
+    __scalar?: boolean | number
+}
+
+export interface ToolIndexEntryGenqlSelection{
+    name?: boolean | number
+    description?: boolean | number
+    category?: boolean | number
+    objectName?: boolean | number
+    icon?: boolean | number
+    inputSchema?: boolean | number
+    __typename?: boolean | number
+    __scalar?: boolean | number
+}
+
+export interface AgentMessagePartGenqlSelection{
+    id?: boolean | number
+    messageId?: boolean | number
+    orderIndex?: boolean | number
+    type?: boolean | number
+    textContent?: boolean | number
+    reasoningContent?: boolean | number
+    toolName?: boolean | number
+    toolCallId?: boolean | number
+    toolInput?: boolean | number
+    toolOutput?: boolean | number
+    state?: boolean | number
+    providerExecuted?: boolean | number
+    errorMessage?: boolean | number
+    errorDetails?: boolean | number
+    sourceUrlSourceId?: boolean | number
+    sourceUrlUrl?: boolean | number
+    sourceUrlTitle?: boolean | number
+    sourceDocumentSourceId?: boolean | number
+    sourceDocumentMediaType?: boolean | number
+    sourceDocumentTitle?: boolean | number
+    sourceDocumentFilename?: boolean | number
+    fileMediaType?: boolean | number
+    fileFilename?: boolean | number
+    fileId?: boolean | number
+    fileUrl?: boolean | number
+    providerMetadata?: boolean | number
+    createdAt?: boolean | number
+    __typename?: boolean | number
+    __scalar?: boolean | number
+}
+
 export interface ResendEmailVerificationTokenGenqlSelection{
     success?: boolean | number
     __typename?: boolean | number
@@ -4840,13 +4904,6 @@ export interface DomainValidRecordsGenqlSelection{
 export interface UpsertRowLevelPermissionPredicatesResultGenqlSelection{
     predicates?: RowLevelPermissionPredicateGenqlSelection
     predicateGroups?: RowLevelPermissionPredicateGroupGenqlSelection
-    __typename?: boolean | number
-    __scalar?: boolean | number
-}
-
-export interface LogicFunctionLogsGenqlSelection{
-    /** Execution Logs */
-    logs?: boolean | number
     __typename?: boolean | number
     __scalar?: boolean | number
 }
@@ -5165,63 +5222,6 @@ export interface ConnectedImapSmtpCaldavAccountGenqlSelection{
 export interface ImapSmtpCaldavConnectionSuccessGenqlSelection{
     success?: boolean | number
     connectedAccountId?: boolean | number
-    __typename?: boolean | number
-    __scalar?: boolean | number
-}
-
-export interface WebhookGenqlSelection{
-    id?: boolean | number
-    targetUrl?: boolean | number
-    operations?: boolean | number
-    description?: boolean | number
-    secret?: boolean | number
-    applicationId?: boolean | number
-    createdAt?: boolean | number
-    updatedAt?: boolean | number
-    deletedAt?: boolean | number
-    __typename?: boolean | number
-    __scalar?: boolean | number
-}
-
-export interface ToolIndexEntryGenqlSelection{
-    name?: boolean | number
-    description?: boolean | number
-    category?: boolean | number
-    objectName?: boolean | number
-    icon?: boolean | number
-    inputSchema?: boolean | number
-    __typename?: boolean | number
-    __scalar?: boolean | number
-}
-
-export interface AgentMessagePartGenqlSelection{
-    id?: boolean | number
-    messageId?: boolean | number
-    orderIndex?: boolean | number
-    type?: boolean | number
-    textContent?: boolean | number
-    reasoningContent?: boolean | number
-    toolName?: boolean | number
-    toolCallId?: boolean | number
-    toolInput?: boolean | number
-    toolOutput?: boolean | number
-    state?: boolean | number
-    providerExecuted?: boolean | number
-    errorMessage?: boolean | number
-    errorDetails?: boolean | number
-    sourceUrlSourceId?: boolean | number
-    sourceUrlUrl?: boolean | number
-    sourceUrlTitle?: boolean | number
-    sourceDocumentSourceId?: boolean | number
-    sourceDocumentMediaType?: boolean | number
-    sourceDocumentTitle?: boolean | number
-    sourceDocumentFilename?: boolean | number
-    fileMediaType?: boolean | number
-    fileFilename?: boolean | number
-    fileId?: boolean | number
-    fileUrl?: boolean | number
-    providerMetadata?: boolean | number
-    createdAt?: boolean | number
     __typename?: boolean | number
     __scalar?: boolean | number
 }
@@ -7535,6 +7535,38 @@ export interface LogicFunctionLogsInput {applicationId?: (Scalars['UUID'] | null
     
 
 
+    const LogicFunctionLogs_possibleTypes: string[] = ['LogicFunctionLogs']
+    export const isLogicFunctionLogs = (obj?: { __typename?: any } | null): obj is LogicFunctionLogs => {
+      if (!obj?.__typename) throw new Error('__typename is missing in "isLogicFunctionLogs"')
+      return LogicFunctionLogs_possibleTypes.includes(obj.__typename)
+    }
+    
+
+
+    const Webhook_possibleTypes: string[] = ['Webhook']
+    export const isWebhook = (obj?: { __typename?: any } | null): obj is Webhook => {
+      if (!obj?.__typename) throw new Error('__typename is missing in "isWebhook"')
+      return Webhook_possibleTypes.includes(obj.__typename)
+    }
+    
+
+
+    const ToolIndexEntry_possibleTypes: string[] = ['ToolIndexEntry']
+    export const isToolIndexEntry = (obj?: { __typename?: any } | null): obj is ToolIndexEntry => {
+      if (!obj?.__typename) throw new Error('__typename is missing in "isToolIndexEntry"')
+      return ToolIndexEntry_possibleTypes.includes(obj.__typename)
+    }
+    
+
+
+    const AgentMessagePart_possibleTypes: string[] = ['AgentMessagePart']
+    export const isAgentMessagePart = (obj?: { __typename?: any } | null): obj is AgentMessagePart => {
+      if (!obj?.__typename) throw new Error('__typename is missing in "isAgentMessagePart"')
+      return AgentMessagePart_possibleTypes.includes(obj.__typename)
+    }
+    
+
+
     const ResendEmailVerificationToken_possibleTypes: string[] = ['ResendEmailVerificationToken']
     export const isResendEmailVerificationToken = (obj?: { __typename?: any } | null): obj is ResendEmailVerificationToken => {
       if (!obj?.__typename) throw new Error('__typename is missing in "isResendEmailVerificationToken"')
@@ -7643,14 +7675,6 @@ export interface LogicFunctionLogsInput {applicationId?: (Scalars['UUID'] | null
     export const isUpsertRowLevelPermissionPredicatesResult = (obj?: { __typename?: any } | null): obj is UpsertRowLevelPermissionPredicatesResult => {
       if (!obj?.__typename) throw new Error('__typename is missing in "isUpsertRowLevelPermissionPredicatesResult"')
       return UpsertRowLevelPermissionPredicatesResult_possibleTypes.includes(obj.__typename)
-    }
-    
-
-
-    const LogicFunctionLogs_possibleTypes: string[] = ['LogicFunctionLogs']
-    export const isLogicFunctionLogs = (obj?: { __typename?: any } | null): obj is LogicFunctionLogs => {
-      if (!obj?.__typename) throw new Error('__typename is missing in "isLogicFunctionLogs"')
-      return LogicFunctionLogs_possibleTypes.includes(obj.__typename)
     }
     
 
@@ -7963,30 +7987,6 @@ export interface LogicFunctionLogsInput {applicationId?: (Scalars['UUID'] | null
     export const isImapSmtpCaldavConnectionSuccess = (obj?: { __typename?: any } | null): obj is ImapSmtpCaldavConnectionSuccess => {
       if (!obj?.__typename) throw new Error('__typename is missing in "isImapSmtpCaldavConnectionSuccess"')
       return ImapSmtpCaldavConnectionSuccess_possibleTypes.includes(obj.__typename)
-    }
-    
-
-
-    const Webhook_possibleTypes: string[] = ['Webhook']
-    export const isWebhook = (obj?: { __typename?: any } | null): obj is Webhook => {
-      if (!obj?.__typename) throw new Error('__typename is missing in "isWebhook"')
-      return Webhook_possibleTypes.includes(obj.__typename)
-    }
-    
-
-
-    const ToolIndexEntry_possibleTypes: string[] = ['ToolIndexEntry']
-    export const isToolIndexEntry = (obj?: { __typename?: any } | null): obj is ToolIndexEntry => {
-      if (!obj?.__typename) throw new Error('__typename is missing in "isToolIndexEntry"')
-      return ToolIndexEntry_possibleTypes.includes(obj.__typename)
-    }
-    
-
-
-    const AgentMessagePart_possibleTypes: string[] = ['AgentMessagePart']
-    export const isAgentMessagePart = (obj?: { __typename?: any } | null): obj is AgentMessagePart => {
-      if (!obj?.__typename) throw new Error('__typename is missing in "isAgentMessagePart"')
-      return AgentMessagePart_possibleTypes.includes(obj.__typename)
     }
     
 
