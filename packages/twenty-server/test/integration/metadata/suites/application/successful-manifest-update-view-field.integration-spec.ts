@@ -1,12 +1,19 @@
 import { buildBaseManifest } from 'test/integration/metadata/suites/application/utils/build-base-manifest.util';
-import { cleanupApplicationAndAppRegistration } from 'test/integration/metadata/suites/application/utils/cleanup-application-and-app-registration.util';
-import { setupApplicationForSync } from 'test/integration/metadata/suites/application/utils/setup-application-for-sync.util';
+import {
+  cleanupApplicationAndAppRegistration
+} from 'test/integration/metadata/suites/application/utils/cleanup-application-and-app-registration.util';
+import {
+  setupApplicationForSync
+} from 'test/integration/metadata/suites/application/utils/setup-application-for-sync.util';
 import { syncApplication } from 'test/integration/metadata/suites/application/utils/sync-application.util';
 import { uninstallApplication } from 'test/integration/metadata/suites/application/utils/uninstall-application.util';
-import { findManyObjectMetadataWithIndexes } from 'test/integration/metadata/suites/object-metadata/utils/find-many-object-metadata-with-indexes.util';
+import {
+  findManyObjectMetadataWithIndexes
+} from 'test/integration/metadata/suites/object-metadata/utils/find-many-object-metadata-with-indexes.util';
 import { findViewFields } from 'test/integration/metadata/suites/view-field/utils/find-view-fields.util';
 import { findViews } from 'test/integration/metadata/suites/view/utils/find-views.util';
 import { VIEW_FIELD_GQL_FIELDS } from 'test/integration/constants/view-gql-fields.constants';
+import type { FieldManifest } from 'twenty-shared/application';
 import { type Manifest } from 'twenty-shared/application';
 import { STANDARD_OBJECTS } from 'twenty-shared/metadata';
 import { FieldMetadataType, ViewKey } from 'twenty-shared/types';
@@ -25,7 +32,7 @@ const ALL_PEOPLE_VIEW_UNIVERSAL_IDENTIFIER =
 
 const CUSTOM_FIELD_NAME = 'integrationContributedColumn';
 
-const personFieldManifest = {
+const personFieldManifest: FieldManifest = {
   universalIdentifier: TEST_FIELD_ID,
   type: FieldMetadataType.TEXT,
   name: CUSTOM_FIELD_NAME,
@@ -215,9 +222,8 @@ describe('Manifest update - standalone view fields on existing views', () => {
 
     expect(allPeopleViewIdAfterUninstall).toBe(allPeopleViewId);
 
-    const viewFieldsAfterUninstall = await findAllPeopleViewFields(
-      allPeopleViewId,
-    );
+    const viewFieldsAfterUninstall =
+      await findAllPeopleViewFields(allPeopleViewId);
 
     // Our contributed column is gone, the standard columns remain.
     expect(
