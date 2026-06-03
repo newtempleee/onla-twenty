@@ -60,7 +60,7 @@ export default {
         190,
         193,
         206,
-        235,
+        238,
         294,
         304,
         305,
@@ -1895,7 +1895,7 @@ export default {
                 151
             ],
             "billingEntitlements": [
-                234
+                237
             ],
             "hasValidEnterpriseKey": [
                 6
@@ -1996,7 +1996,7 @@ export default {
                 20
             ],
             "deletedWorkspaceMembers": [
-                233
+                236
             ],
             "hasPassword": [
                 6
@@ -2008,7 +2008,7 @@ export default {
                 17
             ],
             "availableWorkspaces": [
-                232
+                235
             ],
             "__typename": [
                 1
@@ -4106,6 +4106,90 @@ export default {
                 1
             ]
         },
+        "PublicConnectionParametersOutput": {
+            "host": [
+                1
+            ],
+            "port": [
+                11
+            ],
+            "username": [
+                1
+            ],
+            "secure": [
+                6
+            ],
+            "__typename": [
+                1
+            ]
+        },
+        "PublicImapSmtpCaldavConnectionParameters": {
+            "IMAP": [
+                220
+            ],
+            "SMTP": [
+                220
+            ],
+            "CALDAV": [
+                220
+            ],
+            "__typename": [
+                1
+            ]
+        },
+        "ConnectedAccountPublicDTO": {
+            "id": [
+                3
+            ],
+            "handle": [
+                1
+            ],
+            "provider": [
+                1
+            ],
+            "lastCredentialsRefreshedAt": [
+                4
+            ],
+            "authFailedAt": [
+                4
+            ],
+            "handleAliases": [
+                1
+            ],
+            "scopes": [
+                1
+            ],
+            "lastSignedInAt": [
+                4
+            ],
+            "userWorkspaceId": [
+                3
+            ],
+            "connectionProviderId": [
+                3
+            ],
+            "applicationId": [
+                3
+            ],
+            "name": [
+                1
+            ],
+            "visibility": [
+                1
+            ],
+            "createdAt": [
+                4
+            ],
+            "updatedAt": [
+                4
+            ],
+            "connectionParameters": [
+                221
+            ],
+            "__typename": [
+                1
+            ]
+        },
         "LogicFunctionLogs": {
             "logs": [
                 1
@@ -4319,7 +4403,7 @@ export default {
                 180
             ],
             "workspace": [
-                227
+                230
             ],
             "__typename": [
                 1
@@ -4388,7 +4472,7 @@ export default {
                 1
             ],
             "sso": [
-                230
+                233
             ],
             "__typename": [
                 1
@@ -4396,10 +4480,10 @@ export default {
         },
         "AvailableWorkspaces": {
             "availableWorkspacesForSignIn": [
-                231
+                234
             ],
             "availableWorkspacesForSignUp": [
-                231
+                234
             ],
             "__typename": [
                 1
@@ -4427,7 +4511,7 @@ export default {
         },
         "BillingEntitlement": {
             "key": [
-                235
+                238
             ],
             "value": [
                 6
@@ -4465,7 +4549,7 @@ export default {
                 1
             ],
             "records": [
-                236
+                239
             ],
             "__typename": [
                 1
@@ -4527,10 +4611,10 @@ export default {
         },
         "AvailableWorkspacesAndAccessTokens": {
             "tokens": [
-                243
+                246
             ],
             "availableWorkspaces": [
-                232
+                235
             ],
             "__typename": [
                 1
@@ -4582,7 +4666,7 @@ export default {
                 32
             ],
             "workspace": [
-                248
+                251
             ],
             "__typename": [
                 1
@@ -4631,7 +4715,7 @@ export default {
         },
         "AuthTokens": {
             "tokens": [
-                243
+                246
             ],
             "__typename": [
                 1
@@ -4672,7 +4756,7 @@ export default {
                 32
             ],
             "workspace": [
-                248
+                251
             ],
             "__typename": [
                 1
@@ -4694,7 +4778,7 @@ export default {
                 1
             ],
             "dailyUsage": [
-                259
+                262
             ],
             "__typename": [
                 1
@@ -4711,7 +4795,7 @@ export default {
                 199
             ],
             "timeSeries": [
-                259
+                262
             ],
             "periodStart": [
                 4
@@ -4720,7 +4804,7 @@ export default {
                 4
             ],
             "userDailyUsage": [
-                260
+                263
             ],
             "__typename": [
                 1
@@ -4885,90 +4969,6 @@ export default {
                 1
             ],
             "location": [
-                269
-            ],
-            "__typename": [
-                1
-            ]
-        },
-        "PublicConnectionParametersOutput": {
-            "host": [
-                1
-            ],
-            "port": [
-                11
-            ],
-            "username": [
-                1
-            ],
-            "secure": [
-                6
-            ],
-            "__typename": [
-                1
-            ]
-        },
-        "PublicImapSmtpCaldavConnectionParameters": {
-            "IMAP": [
-                271
-            ],
-            "SMTP": [
-                271
-            ],
-            "CALDAV": [
-                271
-            ],
-            "__typename": [
-                1
-            ]
-        },
-        "ConnectedAccountPublicDTO": {
-            "id": [
-                3
-            ],
-            "handle": [
-                1
-            ],
-            "provider": [
-                1
-            ],
-            "lastCredentialsRefreshedAt": [
-                4
-            ],
-            "authFailedAt": [
-                4
-            ],
-            "handleAliases": [
-                1
-            ],
-            "scopes": [
-                1
-            ],
-            "lastSignedInAt": [
-                4
-            ],
-            "userWorkspaceId": [
-                3
-            ],
-            "connectionProviderId": [
-                3
-            ],
-            "applicationId": [
-                3
-            ],
-            "name": [
-                1
-            ],
-            "visibility": [
-                1
-            ],
-            "createdAt": [
-                4
-            ],
-            "updatedAt": [
-                4
-            ],
-            "connectionParameters": [
                 272
             ],
             "__typename": [
@@ -5325,7 +5325,7 @@ export default {
                 1
             ],
             "parts": [
-                223
+                226
             ],
             "processedAt": [
                 4
@@ -5610,7 +5610,7 @@ export default {
                 4
             ],
             "connectedAccount": [
-                273
+                222
             ],
             "__typename": [
                 1
@@ -6104,11 +6104,14 @@ export default {
                     ]
                 }
             ],
+            "myConnectedAccounts": [
+                222
+            ],
             "getRoles": [
                 29
             ],
             "getToolIndex": [
-                222
+                225
             ],
             "getToolInputSchema": [
                 15,
@@ -6120,10 +6123,10 @@ export default {
                 }
             ],
             "webhooks": [
-                221
+                224
             ],
             "webhook": [
-                221,
+                224,
                 {
                     "id": [
                         3,
@@ -6185,9 +6188,6 @@ export default {
                         3
                     ]
                 }
-            ],
-            "myConnectedAccounts": [
-                273
             ],
             "myCalendarChannels": [
                 303,
@@ -6258,7 +6258,7 @@ export default {
                 }
             ],
             "checkUserExists": [
-                256,
+                259,
                 {
                     "email": [
                         1,
@@ -6270,7 +6270,7 @@ export default {
                 }
             ],
             "checkWorkspaceInviteHashIsValid": [
-                257,
+                260,
                 {
                     "inviteHash": [
                         1,
@@ -6288,7 +6288,7 @@ export default {
                 }
             ],
             "validatePasswordResetToken": [
-                251,
+                254,
                 {
                     "passwordResetToken": [
                         1,
@@ -6391,7 +6391,7 @@ export default {
                 }
             ],
             "getSSOIdentityProviders": [
-                228
+                231
             ],
             "eventLogs": [
                 290,
@@ -6439,7 +6439,7 @@ export default {
                 }
             ],
             "getAutoCompleteAddress": [
-                268,
+                271,
                 {
                     "address": [
                         1,
@@ -6458,7 +6458,7 @@ export default {
                 }
             ],
             "getAddressDetails": [
-                270,
+                273,
                 {
                     "placeId": [
                         1,
@@ -6471,7 +6471,7 @@ export default {
                 }
             ],
             "getUsageAnalytics": [
-                261,
+                264,
                 {
                     "input": [
                         335
@@ -6479,13 +6479,13 @@ export default {
                 }
             ],
             "findManyPublicDomains": [
-                267
+                270
             ],
             "findManyMarketplaceApps": [
-                265
+                268
             ],
             "findMarketplaceAppDetail": [
-                266,
+                269,
                 {
                     "universalIdentifier": [
                         1,
@@ -7577,6 +7577,15 @@ export default {
                     ]
                 }
             ],
+            "deleteConnectedAccount": [
+                222,
+                {
+                    "id": [
+                        3,
+                        "UUID!"
+                    ]
+                }
+            ],
             "updateWorkspaceMemberRole": [
                 20,
                 {
@@ -7645,7 +7654,7 @@ export default {
                 }
             ],
             "upsertRowLevelPermissionPredicates": [
-                238,
+                241,
                 {
                     "input": [
                         422,
@@ -7676,7 +7685,7 @@ export default {
                 }
             ],
             "createWebhook": [
-                221,
+                224,
                 {
                     "input": [
                         425,
@@ -7685,7 +7694,7 @@ export default {
                 }
             ],
             "updateWebhook": [
-                221,
+                224,
                 {
                     "input": [
                         426,
@@ -7694,7 +7703,7 @@ export default {
                 }
             ],
             "deleteWebhook": [
-                221,
+                224,
                 {
                     "id": [
                         3,
@@ -7821,15 +7830,6 @@ export default {
             ],
             "deleteEmailGroupChannel": [
                 308,
-                {
-                    "id": [
-                        3,
-                        "UUID!"
-                    ]
-                }
-            ],
-            "deleteConnectedAccount": [
-                273,
                 {
                     "id": [
                         3,
@@ -8002,7 +8002,7 @@ export default {
                 }
             ],
             "getAuthorizationUrlForSSO": [
-                246,
+                249,
                 {
                     "input": [
                         449,
@@ -8011,7 +8011,7 @@ export default {
                 }
             ],
             "getLoginTokenFromCredentials": [
-                255,
+                258,
                 {
                     "email": [
                         1,
@@ -8037,7 +8037,7 @@ export default {
                 }
             ],
             "signIn": [
-                244,
+                247,
                 {
                     "email": [
                         1,
@@ -8059,7 +8059,7 @@ export default {
                 }
             ],
             "verifyEmailAndGetLoginToken": [
-                252,
+                255,
                 {
                     "emailVerificationToken": [
                         1,
@@ -8079,7 +8079,7 @@ export default {
                 }
             ],
             "verifyEmailAndGetWorkspaceAgnosticToken": [
-                244,
+                247,
                 {
                     "emailVerificationToken": [
                         1,
@@ -8095,7 +8095,7 @@ export default {
                 }
             ],
             "getAuthTokensFromOTP": [
-                254,
+                257,
                 {
                     "otp": [
                         1,
@@ -8115,7 +8115,7 @@ export default {
                 }
             ],
             "signUp": [
-                244,
+                247,
                 {
                     "email": [
                         1,
@@ -8137,7 +8137,7 @@ export default {
                 }
             ],
             "signUpInWorkspace": [
-                249,
+                252,
                 {
                     "email": [
                         1,
@@ -8168,13 +8168,13 @@ export default {
                 }
             ],
             "signUpInNewWorkspace": [
-                249
+                252
             ],
             "generateTransientToken": [
-                250
+                253
             ],
             "getAuthTokensFromLoginToken": [
-                254,
+                257,
                 {
                     "loginToken": [
                         1,
@@ -8187,7 +8187,7 @@ export default {
                 }
             ],
             "authorizeApp": [
-                242,
+                245,
                 {
                     "clientId": [
                         1,
@@ -8209,7 +8209,7 @@ export default {
                 }
             ],
             "renewToken": [
-                254,
+                257,
                 {
                     "appToken": [
                         1,
@@ -8218,7 +8218,7 @@ export default {
                 }
             ],
             "generateApiKeyToken": [
-                253,
+                256,
                 {
                     "apiKeyId": [
                         3,
@@ -8234,7 +8234,7 @@ export default {
                 32
             ],
             "emailPasswordResetLink": [
-                245,
+                248,
                 {
                     "email": [
                         1,
@@ -8246,7 +8246,7 @@ export default {
                 }
             ],
             "updatePasswordViaResetToken": [
-                247,
+                250,
                 {
                     "passwordResetToken": [
                         1,
@@ -8347,7 +8347,7 @@ export default {
                 }
             ],
             "initiateOTPProvisioning": [
-                240,
+                243,
                 {
                     "loginToken": [
                         1,
@@ -8360,10 +8360,10 @@ export default {
                 }
             ],
             "initiateOTPProvisioningForAuthenticatedUser": [
-                240
+                243
             ],
             "deleteTwoFactorAuthenticationMethod": [
-                239,
+                242,
                 {
                     "twoFactorAuthenticationMethodId": [
                         3,
@@ -8372,7 +8372,7 @@ export default {
                 }
             ],
             "verifyTwoFactorAuthenticationMethodForAuthenticatedUser": [
-                241,
+                244,
                 {
                     "otp": [
                         1,
@@ -8414,7 +8414,7 @@ export default {
                 }
             ],
             "resendEmailVerificationToken": [
-                224,
+                227,
                 {
                     "email": [
                         1,
@@ -8448,7 +8448,7 @@ export default {
                 76
             ],
             "checkCustomDomainValidRecords": [
-                237
+                240
             ],
             "runWorkspaceMigration": [
                 6,
@@ -8469,7 +8469,7 @@ export default {
                 }
             ],
             "createOIDCIdentityProvider": [
-                229,
+                232,
                 {
                     "input": [
                         462,
@@ -8478,7 +8478,7 @@ export default {
                 }
             ],
             "createSAMLIdentityProvider": [
-                229,
+                232,
                 {
                     "input": [
                         463,
@@ -8487,7 +8487,7 @@ export default {
                 }
             ],
             "deleteSSOIdentityProvider": [
-                225,
+                228,
                 {
                     "input": [
                         464,
@@ -8496,7 +8496,7 @@ export default {
                 }
             ],
             "editSSOIdentityProvider": [
-                226,
+                229,
                 {
                     "input": [
                         465,
@@ -8514,7 +8514,7 @@ export default {
                 }
             ],
             "impersonate": [
-                258,
+                261,
                 {
                     "userId": [
                         3,
@@ -8570,7 +8570,7 @@ export default {
                 }
             ],
             "createPublicDomain": [
-                267,
+                270,
                 {
                     "domain": [
                         1,
@@ -8582,7 +8582,7 @@ export default {
                 }
             ],
             "updatePublicDomain": [
-                267,
+                270,
                 {
                     "domain": [
                         1,
@@ -8603,7 +8603,7 @@ export default {
                 }
             ],
             "checkPublicDomainValidRecords": [
-                237,
+                240,
                 {
                     "domain": [
                         1,
@@ -8648,7 +8648,7 @@ export default {
                 6
             ],
             "createDevelopmentApplication": [
-                262,
+                265,
                 {
                     "universalIdentifier": [
                         1,
@@ -8670,7 +8670,7 @@ export default {
                 }
             ],
             "syncApplication": [
-                263,
+                266,
                 {
                     "manifest": [
                         15,
@@ -8679,7 +8679,7 @@ export default {
                 }
             ],
             "uploadApplicationFile": [
-                264,
+                267,
                 {
                     "file": [
                         343,
@@ -11233,7 +11233,7 @@ export default {
                 }
             ],
             "logicFunctionLogs": [
-                220,
+                223,
                 {
                     "input": [
                         475,
