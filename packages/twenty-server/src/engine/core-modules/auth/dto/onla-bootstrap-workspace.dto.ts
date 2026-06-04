@@ -1,5 +1,8 @@
 import {
+  ArrayMaxSize,
   IsEmail,
+  IsArray,
+  IsObject,
   IsOptional,
   IsString,
   Length,
@@ -38,4 +41,14 @@ export class OnlaBootstrapWorkspaceDto {
   @IsString()
   @Length(0, 80)
   owner_last_name?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  default_views?: string[];
+
+  @IsOptional()
+  @IsObject()
+  default_fields?: Record<string, string>;
 }

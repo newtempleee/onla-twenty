@@ -24,7 +24,24 @@ import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-u
 
 const ONLA_CLIENT_ID_KEY = 'onla.clientId';
 const ONLA_CLIENT_NAME_KEY = 'onla.clientName';
+const ONLA_DEFAULT_FIELDS_KEY = 'onla.defaultFields';
+const ONLA_DEFAULT_VIEWS_KEY = 'onla.defaultViews';
 const ONLA_DEFAULT_LOCALE = 'ru-RU';
+const DEFAULT_ONLA_CRM_VIEWS = [
+  'Новые заявки',
+  'Клиенты',
+  'Записи',
+  'Нужно перезвонить',
+  'Эскалации',
+  'История звонков Onla',
+];
+const DEFAULT_ONLA_CRM_FIELDS = {
+  callOutcome: 'Итог звонка',
+  callerPhone: 'Телефон',
+  recordingLink: 'Запись разговора',
+  transcriptExcerpt: 'Фрагмент разговора',
+  bookingStatus: 'Статус записи',
+};
 
 @Injectable()
 export class OnlaBootstrapWorkspaceService {
@@ -53,6 +70,7 @@ export class OnlaBootstrapWorkspaceService {
 
     if (existingWorkspaceByOnlaClient) {
       const owner = await this.ensureOwnerUser(ownerEmail, payload);
+      await this.saveOnlaMapping(existingWorkspaceByOnlaClient.id, payload);
 
       if (
         existingWorkspaceByOnlaClient.activationStatus ===
@@ -68,6 +86,7 @@ export class OnlaBootstrapWorkspaceService {
         existingWorkspaceByOnlaClient,
         owner.id,
         'existing',
+        payload,
       );
     }
 
@@ -78,6 +97,7 @@ export class OnlaBootstrapWorkspaceService {
     if (existingWorkspace) {
       await this.assertOnlaClientMapping(existingWorkspace, payload);
       const owner = await this.ensureOwnerUser(ownerEmail, payload);
+      await this.saveOnlaMapping(existingWorkspace.id, payload);
 
       if (
         existingWorkspace.activationStatus === WorkspaceActivationStatus.ACTIVE
@@ -88,7 +108,7 @@ export class OnlaBootstrapWorkspaceService {
         );
       }
 
-      return this.toResponse(existingWorkspace, owner.id, 'existing');
+      return this.toResponse(existingWorkspace, owner.id, 'existing', payload);
     }
 
     const owner = await this.ensureOwnerUser(ownerEmail, payload);
@@ -114,7 +134,7 @@ export class OnlaBootstrapWorkspaceService {
 
     await this.saveOnlaMapping(activatedWorkspace.id, payload);
 
-    return this.toResponse(activatedWorkspace, owner.id, 'created');
+    return this.toResponse(activatedWorkspace, owner.id, 'created', payload);
   }
 
   private async ensureOwnerUser(
@@ -205,12 +225,22 @@ export class OnlaBootstrapWorkspaceService {
       ONLA_CLIENT_NAME_KEY,
       payload.client_name,
     );
+    await this.saveWorkspaceConfig(
+      workspaceId,
+      ONLA_DEFAULT_VIEWS_KEY,
+      this.defaultViews(payload),
+    );
+    await this.saveWorkspaceConfig(
+      workspaceId,
+      ONLA_DEFAULT_FIELDS_KEY,
+      this.defaultFields(payload),
+    );
   }
 
   private async saveWorkspaceConfig(
     workspaceId: string,
     key: string,
-    value: string,
+    value: unknown,
   ) {
     const existing = await this.keyValuePairRepository.findOne({
       where: { key, workspaceId, userId: IsNull() },
@@ -249,6 +279,7 @@ export class OnlaBootstrapWorkspaceService {
     workspace: WorkspaceEntity,
     ownerUserId: string | null,
     provisioningResult: 'created' | 'existing',
+    payload: OnlaBootstrapWorkspaceDto,
   ): OnlaBootstrapWorkspaceResponseDto {
     const baseUrl =
       process.env.ONLA_CRM_PUBLIC_URL ??
@@ -266,6 +297,29 @@ export class OnlaBootstrapWorkspaceService {
       api_secret_ref: 'onla-fork-service-token',
       owner_user_id: ownerUserId,
       provisioning_result: provisioningResult,
+      default_views: this.defaultViews(payload),
+      default_fields: this.defaultFields(payload),
     };
+  }
+
+  private defaultViews(payload: OnlaBootstrapWorkspaceDto): string[] {
+    const views = payload.default_views
+      ?.map((view) => view.trim())
+      .filter(Boolean);
+
+    return views?.length ? views.slice(0, 12) : DEFAULT_ONLA_CRM_VIEWS;
+  }
+
+  private defaultFields(
+    payload: OnlaBootstrapWorkspaceDto,
+  ): Record<string, string> {
+    const fields = payload.default_fields ?? {};
+    const entries = Object.entries(fields)
+      .map(([key, value]) => [key.trim(), String(value).trim()] as const)
+      .filter(([key, value]) => key && value);
+
+    return entries.length
+      ? Object.fromEntries(entries)
+      : DEFAULT_ONLA_CRM_FIELDS;
   }
 }

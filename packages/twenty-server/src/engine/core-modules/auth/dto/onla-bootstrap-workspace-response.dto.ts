@@ -9,4 +9,6 @@ export type OnlaBootstrapWorkspaceResponseDto = {
   api_secret_ref: string;
   owner_user_id: string | null;
   provisioning_result: 'created' | 'existing';
+  default_views: string[];
+  default_fields: Record<string, string>;
 };
