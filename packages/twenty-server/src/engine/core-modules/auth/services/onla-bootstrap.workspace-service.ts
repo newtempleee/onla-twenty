@@ -124,9 +124,14 @@ export class OnlaBootstrapWorkspaceService {
         },
       );
 
-    await this.workspaceService.activateWorkspace(owner, workspace, {
-      displayName: payload.client_name,
-    });
+    await this.workspaceService.activateWorkspace(
+      owner,
+      workspace,
+      {
+        displayName: payload.client_name,
+      },
+      { skipPrefill: true },
+    );
 
     const activatedWorkspace = await this.workspaceRepository.findOneOrFail({
       where: { id: workspace.id },
