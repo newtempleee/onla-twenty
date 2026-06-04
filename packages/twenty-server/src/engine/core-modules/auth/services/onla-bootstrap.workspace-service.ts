@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { WorkspaceActivationStatus } from 'twenty-shared/workspace';
-import { IsNull, Repository } from 'typeorm';
+import { DataSource, IsNull, type QueryRunner, Repository } from 'typeorm';
 
 import {
   KeyValuePairEntity,
@@ -20,6 +20,7 @@ import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.ent
 
 import { OnlaBootstrapWorkspaceDto } from 'src/engine/core-modules/auth/dto/onla-bootstrap-workspace.dto';
 import { OnlaBootstrapWorkspaceResponseDto } from 'src/engine/core-modules/auth/dto/onla-bootstrap-workspace-response.dto';
+import { OnlaSyncCallActivityDto } from 'src/engine/core-modules/auth/dto/onla-sync-call-activity.dto';
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
 
 const ONLA_CLIENT_ID_KEY = 'onla.clientId';
@@ -42,6 +43,16 @@ const DEFAULT_ONLA_CRM_FIELDS = {
   transcriptExcerpt: 'Фрагмент разговора',
   bookingStatus: 'Статус записи',
 };
+const ONLA_CREATED_BY = 'Onla';
+
+type SyncedCallActivity = {
+  status: 'ok';
+  workspace_id: string;
+  workspace_slug: string;
+  person_id: string;
+  note_id: string;
+  task_id: string | null;
+};
 
 @Injectable()
 export class OnlaBootstrapWorkspaceService {
@@ -56,6 +67,7 @@ export class OnlaBootstrapWorkspaceService {
     private readonly userService: UserService,
     private readonly userWorkspaceService: UserWorkspaceService,
     private readonly workspaceService: WorkspaceService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async bootstrapWorkspace(
@@ -140,6 +152,407 @@ export class OnlaBootstrapWorkspaceService {
     await this.saveOnlaMapping(activatedWorkspace.id, payload);
 
     return this.toResponse(activatedWorkspace, owner.id, 'created', payload);
+  }
+
+  async syncCallActivity(
+    payload: OnlaSyncCallActivityDto,
+  ): Promise<SyncedCallActivity> {
+    const workspace = await this.findWorkspaceByOnlaClientId(
+      payload.onla_client_id,
+    );
+
+    if (!workspace) {
+      throw new BadRequestException('Onla CRM workspace was not found');
+    }
+
+    if (workspace.activationStatus !== WorkspaceActivationStatus.ACTIVE) {
+      throw new BadRequestException('Onla CRM workspace is not active');
+    }
+
+    if (!workspace.databaseSchema) {
+      throw new BadRequestException('Onla CRM workspace schema is not ready');
+    }
+
+    const schema = this.quoteIdentifier(workspace.databaseSchema);
+    const phone = this.parsePhone(payload.caller_phone);
+    const displayPhone = payload.caller_phone?.trim() || 'без номера';
+    const marker = `[onla_call_id:${payload.onla_call_id}]`;
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const personId = await this.upsertCallerPerson(
+        queryRunner,
+        schema,
+        phone,
+        payload,
+        displayPhone,
+      );
+      const noteId = await this.upsertCallNote(
+        queryRunner,
+        schema,
+        personId,
+        marker,
+        payload,
+        displayPhone,
+      );
+      const taskId = await this.upsertCallbackTaskIfNeeded(
+        queryRunner,
+        schema,
+        personId,
+        marker,
+        payload,
+        displayPhone,
+      );
+
+      await queryRunner.commitTransaction();
+
+      return {
+        status: 'ok',
+        workspace_id: workspace.id,
+        workspace_slug: workspace.subdomain,
+        person_id: personId,
+        note_id: noteId,
+        task_id: taskId,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async upsertCallerPerson(
+    queryRunner: QueryRunner,
+    schema: string,
+    phone: {
+      callingCode: string | null;
+      countryCode: string | null;
+      number: string | null;
+    },
+    payload: OnlaSyncCallActivityDto,
+    displayPhone: string,
+  ): Promise<string> {
+    const callerName =
+      payload.caller_name?.trim() || `Клиент ${displayPhone}`.slice(0, 120);
+
+    if (phone.callingCode && phone.number) {
+      const existing = await queryRunner.query(
+        `select id from ${schema}.person
+         where "deletedAt" is null
+           and "phonesPrimaryPhoneCallingCode" = $1
+           and "phonesPrimaryPhoneNumber" = $2
+         limit 1`,
+        [phone.callingCode, phone.number],
+      );
+
+      if (existing[0]?.id) {
+        await queryRunner.query(
+          `update ${schema}.person
+           set "updatedAt" = now(),
+               "updatedByName" = $2,
+               "jobTitle" = coalesce(nullif("jobTitle", ''), $3)
+           where id = $1`,
+          [existing[0].id, ONLA_CREATED_BY, 'Клиент Onla'],
+        );
+
+        return existing[0].id;
+      }
+    }
+
+    const inserted = await queryRunner.query(
+      `insert into ${schema}.person (
+        "nameFirstName",
+        "nameLastName",
+        "phonesPrimaryPhoneNumber",
+        "phonesPrimaryPhoneCountryCode",
+        "phonesPrimaryPhoneCallingCode",
+        "phonesAdditionalPhones",
+        "jobTitle",
+        "createdByName",
+        "updatedByName"
+      ) values ($1, '', $2, $3, $4, '[]'::jsonb, $5, $6, $6)
+      returning id`,
+      [
+        callerName,
+        phone.number,
+        phone.countryCode,
+        phone.callingCode,
+        'Клиент Onla',
+        ONLA_CREATED_BY,
+      ],
+    );
+
+    return inserted[0].id;
+  }
+
+  private async upsertCallNote(
+    queryRunner: QueryRunner,
+    schema: string,
+    personId: string,
+    marker: string,
+    payload: OnlaSyncCallActivityDto,
+    displayPhone: string,
+  ): Promise<string> {
+    const title = `Звонок ${displayPhone}`.slice(0, 200);
+    const markdown = this.callMarkdown(marker, payload, displayPhone);
+    const existing = await queryRunner.query(
+      `select id from ${schema}.note
+       where "deletedAt" is null and "bodyV2Markdown" like $1
+       limit 1`,
+      [`%${marker}%`],
+    );
+    const noteId = existing[0]?.id;
+
+    if (noteId) {
+      await queryRunner.query(
+        `update ${schema}.note
+         set title = $2,
+             "bodyV2Markdown" = $3,
+             "updatedAt" = now(),
+             "updatedByName" = $4
+         where id = $1`,
+        [noteId, title, markdown, ONLA_CREATED_BY],
+      );
+      await this.ensureNoteTarget(queryRunner, schema, noteId, personId);
+
+      return noteId;
+    }
+
+    const inserted = await queryRunner.query(
+      `insert into ${schema}.note (
+        title,
+        "bodyV2Markdown",
+        "createdByName",
+        "updatedByName"
+      ) values ($1, $2, $3, $3)
+      returning id`,
+      [title, markdown, ONLA_CREATED_BY],
+    );
+
+    await this.ensureNoteTarget(queryRunner, schema, inserted[0].id, personId);
+
+    return inserted[0].id;
+  }
+
+  private async upsertCallbackTaskIfNeeded(
+    queryRunner: QueryRunner,
+    schema: string,
+    personId: string,
+    marker: string,
+    payload: OnlaSyncCallActivityDto,
+    displayPhone: string,
+  ): Promise<string | null> {
+    if (!this.requiresCallback(payload)) {
+      return null;
+    }
+
+    const title = `Перезвонить ${displayPhone}`.slice(0, 200);
+    const markdown = [
+      `${marker}`,
+      '',
+      'Клиент попросил внимания менеджера или звонок требует ручной проверки.',
+      payload.onla_call_link ? `Ссылка Onla: ${payload.onla_call_link}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    const existing = await queryRunner.query(
+      `select id from ${schema}.task
+       where "deletedAt" is null and "bodyV2Markdown" like $1
+       limit 1`,
+      [`%${marker}%`],
+    );
+    const taskId = existing[0]?.id;
+
+    if (taskId) {
+      await queryRunner.query(
+        `update ${schema}.task
+         set title = $2,
+             "bodyV2Markdown" = $3,
+             "updatedAt" = now(),
+             "updatedByName" = $4
+         where id = $1`,
+        [taskId, title, markdown, ONLA_CREATED_BY],
+      );
+      await this.ensureTaskTarget(queryRunner, schema, taskId, personId);
+
+      return taskId;
+    }
+
+    const inserted = await queryRunner.query(
+      `insert into ${schema}.task (
+        title,
+        "bodyV2Markdown",
+        "dueAt",
+        status,
+        "createdByName",
+        "updatedByName"
+      ) values ($1, $2, now() + interval '1 hour', 'TODO', $3, $3)
+      returning id`,
+      [title, markdown, ONLA_CREATED_BY],
+    );
+
+    await this.ensureTaskTarget(queryRunner, schema, inserted[0].id, personId);
+
+    return inserted[0].id;
+  }
+
+  private async ensureNoteTarget(
+    queryRunner: QueryRunner,
+    schema: string,
+    noteId: string,
+    personId: string,
+  ) {
+    const existing = await queryRunner.query(
+      `select id from ${schema}."noteTarget"
+       where "deletedAt" is null and "noteId" = $1 and "targetPersonId" = $2
+       limit 1`,
+      [noteId, personId],
+    );
+
+    if (!existing[0]?.id) {
+      await queryRunner.query(
+        `insert into ${schema}."noteTarget" (
+          "noteId",
+          "targetPersonId",
+          "createdByName",
+          "updatedByName"
+        ) values ($1, $2, $3, $3)`,
+        [noteId, personId, ONLA_CREATED_BY],
+      );
+    }
+  }
+
+  private async ensureTaskTarget(
+    queryRunner: QueryRunner,
+    schema: string,
+    taskId: string,
+    personId: string,
+  ) {
+    const existing = await queryRunner.query(
+      `select id from ${schema}."taskTarget"
+       where "deletedAt" is null and "taskId" = $1 and "targetPersonId" = $2
+       limit 1`,
+      [taskId, personId],
+    );
+
+    if (!existing[0]?.id) {
+      await queryRunner.query(
+        `insert into ${schema}."taskTarget" (
+          "taskId",
+          "targetPersonId",
+          "createdByName",
+          "updatedByName"
+        ) values ($1, $2, $3, $3)`,
+        [taskId, personId, ONLA_CREATED_BY],
+      );
+    }
+  }
+
+  private callMarkdown(
+    marker: string,
+    payload: OnlaSyncCallActivityDto,
+    displayPhone: string,
+  ) {
+    return [
+      marker,
+      '',
+      `Телефон: ${displayPhone}`,
+      payload.started_at ? `Когда: ${payload.started_at}` : null,
+      typeof payload.duration_sec === 'number'
+        ? `Длительность: ${Math.round(payload.duration_sec)} сек.`
+        : null,
+      payload.call_outcome ? `Итог звонка: ${payload.call_outcome}` : null,
+      payload.booking_status
+        ? `Статус записи: ${payload.booking_status}`
+        : null,
+      typeof payload.confidence === 'number'
+        ? `Уверенность AI: ${Math.round(payload.confidence * 100)}%`
+        : null,
+      '',
+      payload.summary ? `Кратко: ${payload.summary}` : null,
+      payload.transcript_excerpt
+        ? `Фрагмент разговора: ${payload.transcript_excerpt}`
+        : null,
+      payload.recording_link
+        ? `Запись разговора: ${payload.recording_link}`
+        : null,
+      payload.onla_call_link
+        ? `Карточка звонка в Onla: ${payload.onla_call_link}`
+        : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  private requiresCallback(payload: OnlaSyncCallActivityDto): boolean {
+    if (payload.requires_callback) {
+      return true;
+    }
+
+    const text = [
+      payload.call_outcome,
+      payload.booking_status,
+      payload.summary,
+      payload.transcript_excerpt,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return /перезвон|callback|эскалац|escalat|человек|manager|human|transfer/.test(
+      text,
+    );
+  }
+
+  private parsePhone(raw?: string | null): {
+    callingCode: string | null;
+    countryCode: string | null;
+    number: string | null;
+  } {
+    const digits = raw?.replace(/\D/g, '') ?? '';
+
+    if (!digits) {
+      return { callingCode: null, countryCode: null, number: null };
+    }
+
+    if (
+      digits.length === 11 &&
+      (digits.startsWith('7') || digits.startsWith('8'))
+    ) {
+      return {
+        callingCode: '+7',
+        countryCode: 'RU',
+        number: digits.slice(1),
+      };
+    }
+
+    if (digits.length > 10 && digits.startsWith('971')) {
+      return {
+        callingCode: '+971',
+        countryCode: 'AE',
+        number: digits.slice(3),
+      };
+    }
+
+    return {
+      callingCode: raw?.trim().startsWith('+')
+        ? `+${digits.slice(0, -10)}`
+        : null,
+      countryCode: null,
+      number: digits.length > 10 ? digits.slice(-10) : digits,
+    };
+  }
+
+  private quoteIdentifier(identifier: string) {
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(identifier)) {
+      throw new BadRequestException('Invalid workspace schema');
+    }
+
+    return `"${identifier}"`;
   }
 
   private async ensureOwnerUser(
