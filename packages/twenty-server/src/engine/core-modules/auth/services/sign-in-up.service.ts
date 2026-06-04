@@ -476,6 +476,131 @@ export class SignInUpService {
     );
   }
 
+  async signUpOnNewWorkspaceForOnlaProvisioning(
+    userData: ExistingUserOrPartialUserWithPicture['userData'],
+    workspaceOverrides?: Pick<WorkspaceEntity, 'displayName' | 'subdomain'>,
+  ) {
+    const email =
+      userData.type === 'newUserWithPicture'
+        ? userData.newUserWithPicture.email
+        : userData.existingUser.email;
+
+    if (!email) {
+      throw new AuthException(
+        'Email is required',
+        AuthExceptionCode.INVALID_INPUT,
+        {
+          userFriendlyMessage: msg`Email is required`,
+        },
+      );
+    }
+
+    const workspaceId = v4();
+    const workspaceCustomApplicationId = v4();
+
+    try {
+      const { user, workspace } = await this.dataSource.transaction(
+        async (entityManager) => {
+          const queryRunner = entityManager.queryRunner as QueryRunner;
+
+          const workspaceToCreate = this.workspaceRepository.create({
+            id: workspaceId,
+            subdomain:
+              workspaceOverrides?.subdomain ??
+              (await this.subdomainManagerService.generateSubdomain({})),
+            workspaceCustomApplicationId,
+            displayName: workspaceOverrides?.displayName ?? '',
+            inviteHash: v4(),
+            activationStatus: WorkspaceActivationStatus.PENDING_CREATION,
+            allowImpersonation: false,
+            isPublicInviteLinkEnabled: false,
+            isGoogleAuthEnabled: false,
+            isMicrosoftAuthEnabled: false,
+            isPasswordAuthEnabled: true,
+          });
+
+          const workspace = await queryRunner.manager.save(
+            WorkspaceEntity,
+            workspaceToCreate,
+          );
+
+          const customApplication =
+            await this.applicationService.createWorkspaceCustomApplication(
+              {
+                workspaceId,
+                applicationId: workspaceCustomApplicationId,
+              },
+              queryRunner,
+            );
+
+          const isExistingUser = userData.type === 'existingUser';
+          const user = isExistingUser
+            ? userData.existingUser
+            : await this.saveNewUser(
+                userData.newUserWithPicture,
+                {
+                  canImpersonate: false,
+                  canAccessFullAdminPanel: false,
+                },
+                queryRunner,
+              );
+
+          await this.userWorkspaceService.create(
+            {
+              userId: user.id,
+              workspaceId: workspace.id,
+              isExistingUser,
+              pictureUrl: isExistingUser
+                ? undefined
+                : userData.newUserWithPicture.picture,
+              applicationUniversalIdentifier:
+                customApplication.universalIdentifier,
+            },
+            queryRunner,
+          );
+
+          await this.activateOnboardingForUser(
+            {
+              user,
+              workspace,
+              shouldShowConnectAccountStep: false,
+            },
+            queryRunner,
+          );
+
+          await this.onboardingService.setOnboardingInviteTeamPending(
+            {
+              workspaceId: workspace.id,
+              value: false,
+            },
+            queryRunner,
+          );
+
+          return { user, workspace };
+        },
+      );
+
+      void this.auditService
+        .createContext({ workspaceId })
+        .insertWorkspaceEvent(WORKSPACE_CREATED_EVENT, {});
+
+      return { user, workspace };
+    } finally {
+      await this.workspaceCacheService.invalidateAndRecompute(workspaceId, [
+        'flatApplicationMaps',
+      ]);
+    }
+  }
+
+  async signUpUserForOnlaProvisioning(
+    newUserWithPicture: PartialUserWithPicture,
+  ) {
+    return await this.saveNewUser(newUserWithPicture, {
+      canImpersonate: false,
+      canAccessFullAdminPanel: false,
+    });
+  }
+
   async signUpOnNewWorkspace(
     userData: ExistingUserOrPartialUserWithPicture['userData'],
   ) {
