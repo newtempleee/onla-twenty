@@ -44,6 +44,112 @@ const DEFAULT_ONLA_CRM_FIELDS = {
   bookingStatus: 'Статус записи',
 };
 const ONLA_CREATED_BY = 'Onla';
+const ONLA_OBJECT_LABELS: Record<
+  string,
+  { singular: string; plural: string; nav: string; position: number }
+> = {
+  person: {
+    singular: 'Клиент',
+    plural: 'Клиенты',
+    nav: 'Клиенты',
+    position: 0,
+  },
+  opportunity: {
+    singular: 'Заявка',
+    plural: 'Заявки',
+    nav: 'Заявки',
+    position: 1,
+  },
+  task: {
+    singular: 'Задача',
+    plural: 'Нужно перезвонить',
+    nav: 'Нужно перезвонить',
+    position: 2,
+  },
+  note: {
+    singular: 'Запись звонка',
+    plural: 'История звонков',
+    nav: 'История звонков',
+    position: 3,
+  },
+  company: {
+    singular: 'Компания',
+    plural: 'Компании',
+    nav: 'Компании',
+    position: 20,
+  },
+};
+const ONLA_FIELD_LABELS: Record<string, Record<string, string>> = {
+  company: {
+    createdAt: 'Создано',
+    name: 'Название',
+    noteTargets: 'История звонков',
+    people: 'Клиенты',
+    taskTargets: 'Задачи',
+    updatedAt: 'Обновлено',
+  },
+  note: {
+    bodyV2: 'Описание',
+    createdAt: 'Создано',
+    noteTargets: 'Клиент',
+    title: 'Заголовок',
+    updatedAt: 'Обновлено',
+  },
+  opportunity: {
+    amount: 'Сумма',
+    closeDate: 'Дата',
+    company: 'Компания',
+    createdAt: 'Создано',
+    name: 'Заявка',
+    pointOfContact: 'Клиент',
+    stage: 'Статус',
+    taskTargets: 'Задачи',
+    noteTargets: 'История звонков',
+    updatedAt: 'Обновлено',
+  },
+  person: {
+    city: 'Город',
+    company: 'Компания',
+    createdAt: 'Создано',
+    emails: 'Email',
+    jobTitle: 'Тип',
+    name: 'Имя',
+    noteTargets: 'История звонков',
+    phones: 'Телефон',
+    taskTargets: 'Задачи',
+    updatedAt: 'Обновлено',
+  },
+  task: {
+    assignee: 'Ответственный',
+    bodyV2: 'Комментарий',
+    createdAt: 'Создано',
+    dueAt: 'Срок',
+    status: 'Статус',
+    taskTargets: 'Клиент',
+    title: 'Задача',
+    updatedAt: 'Обновлено',
+  },
+};
+const ONLA_VIEW_NAMES: Record<string, Record<string, string>> = {
+  note: {
+    FIELDS_WIDGET: 'Карточка звонка',
+    INDEX: 'История звонков',
+  },
+  opportunity: {
+    FIELDS_WIDGET: 'Карточка заявки',
+    INDEX: 'Новые заявки',
+    KANBAN: 'По статусу',
+  },
+  person: {
+    FIELDS_WIDGET: 'Карточка клиента',
+    INDEX: 'Клиенты',
+  },
+  task: {
+    FIELDS_WIDGET: 'Карточка задачи',
+    INDEX: 'Нужно перезвонить',
+    KANBAN: 'По статусу',
+  },
+};
 
 type SyncedCallActivity = {
   status: 'ok';
@@ -83,6 +189,7 @@ export class OnlaBootstrapWorkspaceService {
     if (existingWorkspaceByOnlaClient) {
       const owner = await this.ensureOwnerUser(ownerEmail, payload);
       await this.saveOnlaMapping(existingWorkspaceByOnlaClient.id, payload);
+      await this.polishOnlaWorkspace(existingWorkspaceByOnlaClient.id);
 
       if (
         existingWorkspaceByOnlaClient.activationStatus ===
@@ -110,6 +217,7 @@ export class OnlaBootstrapWorkspaceService {
       await this.assertOnlaClientMapping(existingWorkspace, payload);
       const owner = await this.ensureOwnerUser(ownerEmail, payload);
       await this.saveOnlaMapping(existingWorkspace.id, payload);
+      await this.polishOnlaWorkspace(existingWorkspace.id);
 
       if (
         existingWorkspace.activationStatus === WorkspaceActivationStatus.ACTIVE
@@ -150,6 +258,7 @@ export class OnlaBootstrapWorkspaceService {
     });
 
     await this.saveOnlaMapping(activatedWorkspace.id, payload);
+    await this.polishOnlaWorkspace(activatedWorkspace.id);
 
     return this.toResponse(activatedWorkspace, owner.id, 'created', payload);
   }
@@ -222,6 +331,92 @@ export class OnlaBootstrapWorkspaceService {
       throw error;
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  private async polishOnlaWorkspace(workspaceId: string) {
+    for (const [nameSingular, labels] of Object.entries(ONLA_OBJECT_LABELS)) {
+      await this.dataSource.query(
+        `update core."objectMetadata"
+         set "labelSingular" = $2,
+             "labelPlural" = $3,
+             "isLabelSyncedWithName" = false,
+             "updatedAt" = now()
+         where "workspaceId" = $1 and "nameSingular" = $4`,
+        [workspaceId, labels.singular, labels.plural, nameSingular],
+      );
+    }
+
+    for (const [objectName, fields] of Object.entries(ONLA_FIELD_LABELS)) {
+      for (const [fieldName, label] of Object.entries(fields)) {
+        await this.dataSource.query(
+          `update core."fieldMetadata" field
+           set label = $3,
+               "isLabelSyncedWithName" = false,
+               "updatedAt" = now()
+           from core."objectMetadata" object
+           where object.id = field."objectMetadataId"
+             and field."workspaceId" = $1
+             and object."workspaceId" = $1
+             and object."nameSingular" = $2
+             and field.name = $4`,
+          [workspaceId, objectName, label, fieldName],
+        );
+      }
+    }
+
+    for (const [objectName, views] of Object.entries(ONLA_VIEW_NAMES)) {
+      for (const [viewKey, name] of Object.entries(views)) {
+        await this.dataSource.query(
+          `update core.view view
+           set name = $3,
+               "updatedAt" = now()
+           from core."objectMetadata" object
+           where object.id = view."objectMetadataId"
+             and view."workspaceId" = $1
+             and object."workspaceId" = $1
+             and object."nameSingular" = $2
+             and (view.key::text = $4 or view.type::text = $4)`,
+          [workspaceId, objectName, name, viewKey],
+        );
+      }
+    }
+
+    await this.dataSource.query(
+      `delete from core."navigationMenuItem" nav
+       where nav."workspaceId" = $1
+         and (
+           nav.type <> 'OBJECT'
+           or not exists (
+             select 1
+             from core."objectMetadata" object
+             where object.id = nav."targetObjectMetadataId"
+               and object."nameSingular" = any($2::text[])
+           )
+         )`,
+      [
+        workspaceId,
+        Object.keys(ONLA_OBJECT_LABELS).filter((name) => name !== 'company'),
+      ],
+    );
+
+    for (const [objectName, labels] of Object.entries(ONLA_OBJECT_LABELS)) {
+      if (objectName === 'company') {
+        continue;
+      }
+
+      await this.dataSource.query(
+        `update core."navigationMenuItem" nav
+         set name = $3,
+             position = $4,
+             "updatedAt" = now()
+         from core."objectMetadata" object
+         where object.id = nav."targetObjectMetadataId"
+           and nav."workspaceId" = $1
+           and object."workspaceId" = $1
+           and object."nameSingular" = $2`,
+        [workspaceId, objectName, labels.nav, labels.position],
+      );
     }
   }
 
