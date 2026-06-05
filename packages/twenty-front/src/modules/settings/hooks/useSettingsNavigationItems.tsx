@@ -76,6 +76,61 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
   const isEmailGroupFeatureEnabled = useIsFeatureEnabled(
     FeatureFlagKey.IS_EMAIL_GROUP_ENABLED,
   );
+
+  if (!isAdminEnabled) {
+    return [
+      {
+        label: 'Профиль',
+        items: [
+          {
+            label: 'Мой профиль',
+            path: SettingsPath.ProfilePage,
+            Icon: IconUserCircle,
+          },
+          {
+            label: 'Внешний вид',
+            path: SettingsPath.Experience,
+            Icon: IconColorSwatch,
+          },
+        ],
+      },
+      {
+        label: 'Команда',
+        items: [
+          {
+            label: 'Сотрудники',
+            path: SettingsPath.WorkspaceMembersPage,
+            Icon: IconUsers,
+            isHidden: !permissionMap[PermissionFlagType.WORKSPACE_MEMBERS],
+          },
+        ],
+      },
+      {
+        label: 'Помощь',
+        items: [
+          {
+            label: 'Написать в поддержку Onla',
+            onClick: () =>
+              window.open('https://onla-ai.ru/dashboard', '_blank'),
+            Icon: IconHelpCircle,
+          },
+          {
+            label: 'Чат поддержки',
+            onClick: () => window.FrontChat?.('show'),
+            Icon: IconMessage,
+            isHidden: !isSupportChatConfigured,
+          },
+          {
+            label: 'Выйти',
+            onClick: signOut,
+            Icon: IconDoorEnter,
+            matchSubPages: false,
+          },
+        ],
+      },
+    ];
+  }
+
   return [
     {
       label: t`User`,

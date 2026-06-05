@@ -14,6 +14,8 @@ import { AppPath, SettingsPath } from 'twenty-shared/types';
 import { getAppPath, getSettingsPath, isDefined } from 'twenty-shared/utils';
 import { useStore } from 'jotai';
 
+const ONLA_DEFAULT_OBJECT_ORDER = ['person', 'opportunity', 'task', 'note'];
+
 export const useDefaultHomePagePath = () => {
   const store = useStore();
   const currentUser = useAtomStateValue(currentUserState);
@@ -58,7 +60,12 @@ export const useDefaultHomePagePath = () => {
   );
 
   const firstObjectPathInfo = useMemo<ObjectPathInfo | null>(() => {
-    const [firstObjectMetadataItem] = readableNonSystemObjectMetadataItems;
+    const firstObjectMetadataItem =
+      ONLA_DEFAULT_OBJECT_ORDER.map((nameSingular) =>
+        readableNonSystemObjectMetadataItems.find(
+          (item) => item.nameSingular === nameSingular,
+        ),
+      ).find(isDefined) ?? readableNonSystemObjectMetadataItems[0];
 
     if (!isDefined(firstObjectMetadataItem)) {
       return null;

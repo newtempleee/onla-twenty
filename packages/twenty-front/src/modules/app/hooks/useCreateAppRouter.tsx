@@ -240,6 +240,7 @@ export const useCreateAppRouter = (
               <SettingsRoutes
                 isFunctionSettingsEnabled={isFunctionSettingsEnabled}
                 isAdminPageEnabled={isAdminPageEnabled}
+                isOnlaCustomerMode={!isAdminPageEnabled}
               />
             }
           />

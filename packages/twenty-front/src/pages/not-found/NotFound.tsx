@@ -1,4 +1,4 @@
-import { Trans, useLingui } from '@lingui/react/macro';
+import { Trans } from '@lingui/react/macro';
 import { lazy, Suspense } from 'react';
 
 const BackgroundMockPage = lazy(() =>
@@ -42,28 +42,25 @@ const StyledButtonContainer = styled.div`
 `;
 
 export const NotFound = () => {
-  const { t } = useLingui();
-
   return (
     <>
-      <PageTitle title={t`Page Not Found | Twenty`} />
+      <PageTitle title="Страница не найдена | Onla CRM" />
       <StyledBackDrop>
         <AnimatedPlaceholderErrorContainer>
           <AnimatedPlaceholder type="error404" />
           <AnimatedPlaceholderEmptyTextContainer>
             <AnimatedPlaceholderErrorTitle>
-              <Trans>Off the beaten path</Trans>
+              <Trans>Страница не найдена</Trans>
             </AnimatedPlaceholderErrorTitle>
             <AnimatedPlaceholderErrorSubTitle>
               <Trans>
-                The page you're seeking is either gone or never was. Let's get
-                you back on track
+                Похоже, этот раздел недоступен. Вернёмся к клиентам и заявкам.
               </Trans>
             </AnimatedPlaceholderErrorSubTitle>
           </AnimatedPlaceholderEmptyTextContainer>
           <StyledButtonContainer>
             <UndecoratedLink to={AppPath.Index}>
-              <MainButton title={t`Back to content`} fullWidth />
+              <MainButton title="Вернуться в CRM" fullWidth />
             </UndecoratedLink>
           </StyledButtonContainer>
         </AnimatedPlaceholderErrorContainer>

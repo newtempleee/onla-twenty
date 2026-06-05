@@ -592,427 +592,494 @@ const SettingsRoleAddObjectLevel = lazy(() =>
 type SettingsRoutesProps = {
   isFunctionSettingsEnabled?: boolean;
   isAdminPageEnabled?: boolean;
+  isOnlaCustomerMode?: boolean;
 };
 
-export const SettingsRoutes = ({ isAdminPageEnabled }: SettingsRoutesProps) => (
-  <Suspense fallback={<SettingsSkeletonLoader />}>
-    <Routes>
-      <Route path={SettingsPath.ProfilePage} element={<SettingsProfile />} />
-      <Route
-        path={SettingsPath.TwoFactorAuthenticationStrategyConfig}
-        element={<SettingsTwoFactorAuthenticationMethod />}
-      />
-      <Route path={SettingsPath.Experience} element={<SettingsExperience />} />
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.CONNECTED_ACCOUNTS}
-          />
-        }
-      >
-        <Route path={SettingsPath.Accounts} element={<SettingsAccounts />} />
-        <Route
-          path={SettingsPath.AccountsEmails}
-          element={<SettingsAccountsEmails />}
-        />
-        <Route
-          path={SettingsPath.AccountsCalendars}
-          element={<SettingsAccountsCalendars />}
-        />
-        <Route
-          path={SettingsPath.NewAccount}
-          element={<SettingsNewAccount />}
-        />
-        <Route
-          path={SettingsPath.AccountsConfiguration}
-          element={<SettingsAccountsConfiguration />}
-        />
-        <Route
-          path={SettingsPath.NewImapSmtpCaldavConnection}
-          element={<SettingsNewImapSmtpCaldavConnection />}
-        />
-        <Route
-          path={SettingsPath.EditImapSmtpCaldavConnection}
-          element={<SettingsEditImapSmtpCaldavConnection />}
-        />
-      </Route>
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.WORKSPACE}
-          />
-        }
-      >
-        <Route path={SettingsPath.General} element={<SettingsGeneral />} />
-        <Route
-          path={SettingsPath.WorkspaceEmail}
-          element={<SettingsWorkspaceEmail />}
-        />
-        <Route
-          path={SettingsPath.NewEmailGroupChannel}
-          element={<SettingsNewEmailGroupChannel />}
-        />
-        <Route
-          path={SettingsPath.EmailGroupChannelDetail}
-          element={<SettingsWorkspaceEmailGroupChannelDetail />}
-        />
-        <Route
-          path={SettingsPath.ApiWebhooks}
-          element={<SettingsApiWebhooks />}
-        />
-        <Route path={SettingsPath.Billing} element={<SettingsBilling />} />
-        <Route path={SettingsPath.Usage} element={<SettingsUsage />} />
-        <Route
-          path={SettingsPath.UsageUserDetail}
-          element={<SettingsUsageUserDetail />}
-        />
-        <Route
-          path={SettingsPath.Subdomain}
-          element={<SettingsSubdomainPage />}
-        />
-        <Route
-          path={SettingsPath.CustomDomain}
-          element={<SettingsCustomDomainPage />}
-        />
-        <Route
-          path={SettingsPath.NewEmailingDomain}
-          element={<SettingsNewEmailingDomain />}
-        />
-        <Route
-          path={SettingsPath.EmailingDomainDetail}
-          element={<SettingsEmailingDomainDetail />}
-        />
-        <Route
-          path={SettingsPath.PublicDomain}
-          element={<SettingPublicDomain />}
-        />
-      </Route>
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.AI}
-          />
-        }
-      >
-        <Route path={SettingsPath.AI} element={<SettingsAI />} />
-        <Route path={SettingsPath.AiPrompts} element={<SettingsAiPrompts />} />
-        <Route
-          path={SettingsPath.AiNewAgent}
-          element={<SettingsAgentForm mode="create" />}
-        />
-        <Route
-          path={SettingsPath.AiAgentDetail}
-          element={<SettingsAgentForm mode="edit" />}
-        />
-        <Route
-          path={SettingsPath.AiAgentTurnDetail}
-          element={<SettingsAgentTurnDetail />}
-        />
-        <Route
-          path={SettingsPath.AiNewSkill}
-          element={<SettingsSkillForm mode="create" />}
-        />
-        <Route
-          path={SettingsPath.AiSkillDetail}
-          element={<SettingsSkillForm mode="edit" />}
-        />
-        <Route
-          path={SettingsPath.AiUsageUserDetail}
-          element={<SettingsAiUsageUserDetail />}
-        />
-        <Route
-          path={SettingsPath.AiToolDetail}
-          element={<SettingsToolDetail />}
-        />
-        <Route
-          path={SettingsPath.LogicFunctionDetail}
-          element={<SettingsLogicFunctionDetail />}
-        />
-      </Route>
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.LAYOUTS}
-          />
-        }
-      >
-        <Route path={SettingsPath.Layout} element={<SettingsLayout />} />
-      </Route>
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.WORKSPACE_MEMBERS}
-          />
-        }
-      >
-        <Route
-          path={SettingsPath.WorkspaceMembersPage}
-          element={<SettingsWorkspaceMembers />}
-        />
-        <Route
-          path={SettingsPath.WorkspaceMemberPage}
-          element={<SettingsWorkspaceMember />}
-        />
-      </Route>
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.DATA_MODEL}
-          />
-        }
-      >
-        <Route path={SettingsPath.Objects} element={<SettingsObjects />} />
-        <Route
-          path={SettingsPath.ObjectOverview}
-          element={<SettingsObjectOverview />}
-        />
-        <Route
-          path={SettingsPath.ObjectDetail}
-          element={<SettingsObjectDetailPage />}
-        />
-        <Route path={SettingsPath.NewObject} element={<SettingsNewObject />} />
-        <Route
-          path={SettingsPath.ObjectNewFieldSelect}
-          element={<SettingsObjectNewFieldSelect />}
-        />
-        <Route
-          path={SettingsPath.ObjectNewFieldConfigure}
-          element={<SettingsObjectNewFieldConfigure />}
-        />
-        <Route
-          path={SettingsPath.ObjectNewIndex}
-          element={<SettingsObjectNewIndex />}
-        />
-        <Route
-          path={SettingsPath.ObjectFieldEdit}
-          element={<SettingsObjectFieldEdit />}
-        />
-      </Route>
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.ROLES}
-          />
-        }
-      >
-        <Route
-          path={SettingsPath.Roles}
-          element={
-            <Navigate
-              to={`/settings/${SettingsPath.WorkspaceMembersPage}#roles`}
-              replace
-            />
-          }
-        />
-        <Route path={SettingsPath.RoleDetail} element={<SettingsRoleEdit />} />
-        <Route
-          path={SettingsPath.RoleCreate}
-          element={<SettingsRoleCreate />}
-        />
-        <Route
-          path={SettingsPath.RoleObjectLevel}
-          element={<SettingsRoleObjectLevel />}
-        />
-        <Route
-          path={SettingsPath.RoleAddObjectLevel}
-          element={<SettingsRoleAddObjectLevel />}
-        />
-      </Route>
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.API_KEYS_AND_WEBHOOKS}
-          />
-        }
-      >
-        <Route
-          path={`${SettingsPath.GraphQLPlayground}`}
-          element={<SettingsGraphQLPlayground />}
-        />
-        <Route
-          path={`${SettingsPath.RestPlayground}/*`}
-          element={<SettingsRestPlayground />}
-        />
-        <Route
-          path={SettingsPath.NewApiKey}
-          element={<SettingsDevelopersApiKeysNew />}
-        />
-        <Route
-          path={SettingsPath.ApiKeyDetail}
-          element={<SettingsDevelopersApiKeyDetail />}
-        />
-        <Route
-          path={SettingsPath.NewWebhook}
-          element={<SettingsDevelopersWebhookNew />}
-        />
-        <Route
-          path={SettingsPath.WebhookDetail}
-          element={<SettingsDevelopersWebhookDetail />}
-        />
-      </Route>
-
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.APPLICATIONS}
-          />
-        }
-      >
-        <Route
-          path={SettingsPath.Applications}
-          element={<SettingsApplications />}
-        />
-        <Route
-          path={SettingsPath.ApplicationDetail}
-          element={<SettingsApplicationDetails />}
-        />
-        <Route
-          path={SettingsPath.ApplicationConnectionDetail}
-          element={<SettingsApplicationConnectionDetail />}
-        />
-        <Route
-          path={SettingsPath.AvailableApplicationDetail}
-          element={<SettingsAvailableApplicationDetails />}
-        />
-        <Route
-          path={SettingsPath.ApplicationRegistrationDetail}
-          element={<SettingsApplicationRegistrationDetails />}
-        />
-        <Route
-          path={SettingsPath.ApplicationLogicFunctionDetail}
-          element={<SettingsLogicFunctionDetail />}
-        />
-        <Route
-          path={SettingsPath.ApplicationFrontComponentDetail}
-          element={<SettingsApplicationFrontComponentDetail />}
-        />
-        <Route
-          path={SettingsPath.ApplicationCommandMenuItemDetail}
-          element={<SettingsApplicationCommandMenuItemDetail />}
-        />
-        <Route
-          path={SettingsPath.ApplicationViewDetail}
-          element={<SettingsLayoutViewDetail />}
-        />
-        <Route
-          path={SettingsPath.ApplicationPageLayoutDetail}
-          element={<SettingsLayoutPageLayoutDetail />}
-        />
-        <Route
-          path={SettingsPath.ApplicationRegistrationConfigVariableDetails}
-          element={<SettingsApplicationRegistrationConfigVariableDetail />}
-        />
-      </Route>
-
-      <Route
-        path="security"
-        element={
-          <Navigate to={getSettingsPath(SettingsPath.Security)} replace />
-        }
-      />
-
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.SECURITY}
-          />
-        }
-      >
-        <Route
-          path={SettingsPath.NewSSOIdentityProvider}
-          element={<SettingsSecuritySSOIdentifyProvider />}
-        />
-        <Route
-          path={SettingsPath.NewApprovedAccessDomain}
-          element={<SettingsSecurityApprovedAccessDomain />}
-        />
-      </Route>
-
-      {isAdminPageEnabled && (
-        <>
-          <Route path={SettingsPath.AdminPanel} element={<SettingsAdmin />} />
+export const SettingsRoutes = ({
+  isAdminPageEnabled,
+  isOnlaCustomerMode = false,
+}: SettingsRoutesProps) => {
+  if (isOnlaCustomerMode && !isAdminPageEnabled) {
+    return (
+      <Suspense fallback={<SettingsSkeletonLoader />}>
+        <Routes>
           <Route
-            path={SettingsPath.Enterprise}
+            path={SettingsPath.ProfilePage}
+            element={<SettingsProfile />}
+          />
+          <Route
+            path={SettingsPath.TwoFactorAuthenticationStrategyConfig}
+            element={<SettingsTwoFactorAuthenticationMethod />}
+          />
+          <Route
+            path={SettingsPath.Experience}
+            element={<SettingsExperience />}
+          />
+          <Route
+            element={
+              <SettingsProtectedRouteWrapper
+                settingsPermission={PermissionFlagType.WORKSPACE_MEMBERS}
+              />
+            }
+          >
+            <Route
+              path={SettingsPath.WorkspaceMembersPage}
+              element={<SettingsWorkspaceMembers />}
+            />
+            <Route
+              path={SettingsPath.WorkspaceMemberPage}
+              element={<SettingsWorkspaceMember />}
+            />
+          </Route>
+          <Route
+            path="*"
             element={
               <Navigate
-                to={getSettingsPath(SettingsPath.AdminPanelEnterprise)}
+                to={getSettingsPath(SettingsPath.ProfilePage)}
+                replace
+              />
+            }
+          />
+        </Routes>
+      </Suspense>
+    );
+  }
+
+  return (
+    <Suspense fallback={<SettingsSkeletonLoader />}>
+      <Routes>
+        <Route path={SettingsPath.ProfilePage} element={<SettingsProfile />} />
+        <Route
+          path={SettingsPath.TwoFactorAuthenticationStrategyConfig}
+          element={<SettingsTwoFactorAuthenticationMethod />}
+        />
+        <Route
+          path={SettingsPath.Experience}
+          element={<SettingsExperience />}
+        />
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.CONNECTED_ACCOUNTS}
+            />
+          }
+        >
+          <Route path={SettingsPath.Accounts} element={<SettingsAccounts />} />
+          <Route
+            path={SettingsPath.AccountsEmails}
+            element={<SettingsAccountsEmails />}
+          />
+          <Route
+            path={SettingsPath.AccountsCalendars}
+            element={<SettingsAccountsCalendars />}
+          />
+          <Route
+            path={SettingsPath.NewAccount}
+            element={<SettingsNewAccount />}
+          />
+          <Route
+            path={SettingsPath.AccountsConfiguration}
+            element={<SettingsAccountsConfiguration />}
+          />
+          <Route
+            path={SettingsPath.NewImapSmtpCaldavConnection}
+            element={<SettingsNewImapSmtpCaldavConnection />}
+          />
+          <Route
+            path={SettingsPath.EditImapSmtpCaldavConnection}
+            element={<SettingsEditImapSmtpCaldavConnection />}
+          />
+        </Route>
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.WORKSPACE}
+            />
+          }
+        >
+          <Route path={SettingsPath.General} element={<SettingsGeneral />} />
+          <Route
+            path={SettingsPath.WorkspaceEmail}
+            element={<SettingsWorkspaceEmail />}
+          />
+          <Route
+            path={SettingsPath.NewEmailGroupChannel}
+            element={<SettingsNewEmailGroupChannel />}
+          />
+          <Route
+            path={SettingsPath.EmailGroupChannelDetail}
+            element={<SettingsWorkspaceEmailGroupChannelDetail />}
+          />
+          <Route
+            path={SettingsPath.ApiWebhooks}
+            element={<SettingsApiWebhooks />}
+          />
+          <Route path={SettingsPath.Billing} element={<SettingsBilling />} />
+          <Route path={SettingsPath.Usage} element={<SettingsUsage />} />
+          <Route
+            path={SettingsPath.UsageUserDetail}
+            element={<SettingsUsageUserDetail />}
+          />
+          <Route
+            path={SettingsPath.Subdomain}
+            element={<SettingsSubdomainPage />}
+          />
+          <Route
+            path={SettingsPath.CustomDomain}
+            element={<SettingsCustomDomainPage />}
+          />
+          <Route
+            path={SettingsPath.NewEmailingDomain}
+            element={<SettingsNewEmailingDomain />}
+          />
+          <Route
+            path={SettingsPath.EmailingDomainDetail}
+            element={<SettingsEmailingDomainDetail />}
+          />
+          <Route
+            path={SettingsPath.PublicDomain}
+            element={<SettingPublicDomain />}
+          />
+        </Route>
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.AI}
+            />
+          }
+        >
+          <Route path={SettingsPath.AI} element={<SettingsAI />} />
+          <Route
+            path={SettingsPath.AiPrompts}
+            element={<SettingsAiPrompts />}
+          />
+          <Route
+            path={SettingsPath.AiNewAgent}
+            element={<SettingsAgentForm mode="create" />}
+          />
+          <Route
+            path={SettingsPath.AiAgentDetail}
+            element={<SettingsAgentForm mode="edit" />}
+          />
+          <Route
+            path={SettingsPath.AiAgentTurnDetail}
+            element={<SettingsAgentTurnDetail />}
+          />
+          <Route
+            path={SettingsPath.AiNewSkill}
+            element={<SettingsSkillForm mode="create" />}
+          />
+          <Route
+            path={SettingsPath.AiSkillDetail}
+            element={<SettingsSkillForm mode="edit" />}
+          />
+          <Route
+            path={SettingsPath.AiUsageUserDetail}
+            element={<SettingsAiUsageUserDetail />}
+          />
+          <Route
+            path={SettingsPath.AiToolDetail}
+            element={<SettingsToolDetail />}
+          />
+          <Route
+            path={SettingsPath.LogicFunctionDetail}
+            element={<SettingsLogicFunctionDetail />}
+          />
+        </Route>
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.LAYOUTS}
+            />
+          }
+        >
+          <Route path={SettingsPath.Layout} element={<SettingsLayout />} />
+        </Route>
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.WORKSPACE_MEMBERS}
+            />
+          }
+        >
+          <Route
+            path={SettingsPath.WorkspaceMembersPage}
+            element={<SettingsWorkspaceMembers />}
+          />
+          <Route
+            path={SettingsPath.WorkspaceMemberPage}
+            element={<SettingsWorkspaceMember />}
+          />
+        </Route>
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.DATA_MODEL}
+            />
+          }
+        >
+          <Route path={SettingsPath.Objects} element={<SettingsObjects />} />
+          <Route
+            path={SettingsPath.ObjectOverview}
+            element={<SettingsObjectOverview />}
+          />
+          <Route
+            path={SettingsPath.ObjectDetail}
+            element={<SettingsObjectDetailPage />}
+          />
+          <Route
+            path={SettingsPath.NewObject}
+            element={<SettingsNewObject />}
+          />
+          <Route
+            path={SettingsPath.ObjectNewFieldSelect}
+            element={<SettingsObjectNewFieldSelect />}
+          />
+          <Route
+            path={SettingsPath.ObjectNewFieldConfigure}
+            element={<SettingsObjectNewFieldConfigure />}
+          />
+          <Route
+            path={SettingsPath.ObjectNewIndex}
+            element={<SettingsObjectNewIndex />}
+          />
+          <Route
+            path={SettingsPath.ObjectFieldEdit}
+            element={<SettingsObjectFieldEdit />}
+          />
+        </Route>
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.ROLES}
+            />
+          }
+        >
+          <Route
+            path={SettingsPath.Roles}
+            element={
+              <Navigate
+                to={`/settings/${SettingsPath.WorkspaceMembersPage}#roles`}
                 replace
               />
             }
           />
           <Route
-            path={SettingsPath.AdminPanelInferredVersion}
-            element={<SettingsAdminInferredVersion />}
+            path={SettingsPath.RoleDetail}
+            element={<SettingsRoleEdit />}
           />
           <Route
-            path={SettingsPath.AdminPanelInstanceStatus}
-            element={<SettingsAdminInstanceStatus />}
+            path={SettingsPath.RoleCreate}
+            element={<SettingsRoleCreate />}
           />
           <Route
-            path={SettingsPath.AdminPanelWorkspacesStatus}
-            element={<SettingsAdminWorkspacesStatus />}
+            path={SettingsPath.RoleObjectLevel}
+            element={<SettingsRoleObjectLevel />}
           />
           <Route
-            path={SettingsPath.AdminPanelIndicatorHealthStatus}
-            element={<SettingsAdminIndicatorHealthStatus />}
+            path={SettingsPath.RoleAddObjectLevel}
+            element={<SettingsRoleAddObjectLevel />}
+          />
+        </Route>
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.API_KEYS_AND_WEBHOOKS}
+            />
+          }
+        >
+          <Route
+            path={`${SettingsPath.GraphQLPlayground}`}
+            element={<SettingsGraphQLPlayground />}
           />
           <Route
-            path={SettingsPath.AdminPanelQueueDetail}
-            element={<SettingsAdminQueueDetail />}
+            path={`${SettingsPath.RestPlayground}/*`}
+            element={<SettingsRestPlayground />}
           />
+          <Route
+            path={SettingsPath.NewApiKey}
+            element={<SettingsDevelopersApiKeysNew />}
+          />
+          <Route
+            path={SettingsPath.ApiKeyDetail}
+            element={<SettingsDevelopersApiKeyDetail />}
+          />
+          <Route
+            path={SettingsPath.NewWebhook}
+            element={<SettingsDevelopersWebhookNew />}
+          />
+          <Route
+            path={SettingsPath.WebhookDetail}
+            element={<SettingsDevelopersWebhookDetail />}
+          />
+        </Route>
 
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.APPLICATIONS}
+            />
+          }
+        >
           <Route
-            path={SettingsPath.AdminPanelConfigVariableDetails}
-            element={<SettingsAdminConfigVariableDetails />}
+            path={SettingsPath.Applications}
+            element={<SettingsApplications />}
           />
           <Route
-            path={SettingsPath.AdminPanelNewAiProvider}
-            element={<SettingsAdminNewAiProvider />}
+            path={SettingsPath.ApplicationDetail}
+            element={<SettingsApplicationDetails />}
           />
           <Route
-            path={SettingsPath.AdminPanelNewAiModel}
-            element={<SettingsAdminNewAiModel />}
+            path={SettingsPath.ApplicationConnectionDetail}
+            element={<SettingsApplicationConnectionDetail />}
           />
           <Route
-            path={SettingsPath.AdminPanelAiProviderDetail}
-            element={<SettingsAdminAiProviderDetail />}
+            path={SettingsPath.AvailableApplicationDetail}
+            element={<SettingsAvailableApplicationDetails />}
           />
           <Route
-            path={SettingsPath.AdminPanelUserDetail}
-            element={<SettingsAdminUserDetail />}
+            path={SettingsPath.ApplicationRegistrationDetail}
+            element={<SettingsApplicationRegistrationDetails />}
           />
           <Route
-            path={SettingsPath.AdminPanelWorkspaceDetail}
-            element={<SettingsAdminWorkspaceDetail />}
+            path={SettingsPath.ApplicationLogicFunctionDetail}
+            element={<SettingsLogicFunctionDetail />}
           />
           <Route
-            path={SettingsPath.AdminPanelApplicationRegistrationDetail}
-            element={<SettingsAdminApplicationRegistrationDetail />}
+            path={SettingsPath.ApplicationFrontComponentDetail}
+            element={<SettingsApplicationFrontComponentDetail />}
           />
           <Route
-            path={
-              SettingsPath.AdminPanelApplicationRegistrationConfigVariableDetails
-            }
-            element={
-              <SettingsAdminApplicationRegistrationConfigVariableDetail />
-            }
+            path={SettingsPath.ApplicationCommandMenuItemDetail}
+            element={<SettingsApplicationCommandMenuItemDetail />}
           />
           <Route
-            path={SettingsPath.AdminPanelWorkspaceChatThread}
-            element={<SettingsAdminWorkspaceChatThread />}
+            path={SettingsPath.ApplicationViewDetail}
+            element={<SettingsLayoutViewDetail />}
           />
-        </>
-      )}
+          <Route
+            path={SettingsPath.ApplicationPageLayoutDetail}
+            element={<SettingsLayoutPageLayoutDetail />}
+          />
+          <Route
+            path={SettingsPath.ApplicationRegistrationConfigVariableDetails}
+            element={<SettingsApplicationRegistrationConfigVariableDetail />}
+          />
+        </Route>
 
-      <Route
-        element={
-          <SettingsProtectedRouteWrapper
-            settingsPermission={PermissionFlagType.WORKSPACE}
+        <Route
+          path="security"
+          element={
+            <Navigate to={getSettingsPath(SettingsPath.Security)} replace />
+          }
+        />
+
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.SECURITY}
+            />
+          }
+        >
+          <Route
+            path={SettingsPath.NewSSOIdentityProvider}
+            element={<SettingsSecuritySSOIdentifyProvider />}
           />
-        }
-      >
-        <Route path={SettingsPath.Community} element={<SettingsCommunity />} />
-      </Route>
-    </Routes>
-  </Suspense>
-);
+          <Route
+            path={SettingsPath.NewApprovedAccessDomain}
+            element={<SettingsSecurityApprovedAccessDomain />}
+          />
+        </Route>
+
+        {isAdminPageEnabled && (
+          <>
+            <Route path={SettingsPath.AdminPanel} element={<SettingsAdmin />} />
+            <Route
+              path={SettingsPath.Enterprise}
+              element={
+                <Navigate
+                  to={getSettingsPath(SettingsPath.AdminPanelEnterprise)}
+                  replace
+                />
+              }
+            />
+            <Route
+              path={SettingsPath.AdminPanelInferredVersion}
+              element={<SettingsAdminInferredVersion />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelInstanceStatus}
+              element={<SettingsAdminInstanceStatus />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelWorkspacesStatus}
+              element={<SettingsAdminWorkspacesStatus />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelIndicatorHealthStatus}
+              element={<SettingsAdminIndicatorHealthStatus />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelQueueDetail}
+              element={<SettingsAdminQueueDetail />}
+            />
+
+            <Route
+              path={SettingsPath.AdminPanelConfigVariableDetails}
+              element={<SettingsAdminConfigVariableDetails />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelNewAiProvider}
+              element={<SettingsAdminNewAiProvider />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelNewAiModel}
+              element={<SettingsAdminNewAiModel />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelAiProviderDetail}
+              element={<SettingsAdminAiProviderDetail />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelUserDetail}
+              element={<SettingsAdminUserDetail />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelWorkspaceDetail}
+              element={<SettingsAdminWorkspaceDetail />}
+            />
+            <Route
+              path={SettingsPath.AdminPanelApplicationRegistrationDetail}
+              element={<SettingsAdminApplicationRegistrationDetail />}
+            />
+            <Route
+              path={
+                SettingsPath.AdminPanelApplicationRegistrationConfigVariableDetails
+              }
+              element={
+                <SettingsAdminApplicationRegistrationConfigVariableDetail />
+              }
+            />
+            <Route
+              path={SettingsPath.AdminPanelWorkspaceChatThread}
+              element={<SettingsAdminWorkspaceChatThread />}
+            />
+          </>
+        )}
+
+        <Route
+          element={
+            <SettingsProtectedRouteWrapper
+              settingsPermission={PermissionFlagType.WORKSPACE}
+            />
+          }
+        >
+          <Route
+            path={SettingsPath.Community}
+            element={<SettingsCommunity />}
+          />
+        </Route>
+      </Routes>
+    </Suspense>
+  );
+};

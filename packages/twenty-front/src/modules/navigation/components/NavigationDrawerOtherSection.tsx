@@ -1,11 +1,6 @@
-import { useLingui } from '@lingui/react/macro';
 import { SettingsPath } from 'twenty-shared/types';
 import { IconHelpCircle, IconSettings } from 'twenty-ui/display';
 import { AnimatedExpandableContainer } from 'twenty-ui/layout';
-
-import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
-import { getDocumentationUrl } from '@/support/utils/getDocumentationUrl';
-import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 
 import { NavigationDrawerAnimatedCollapseWrapper } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerAnimatedCollapseWrapper';
 import { NavigationDrawerItem } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerItem';
@@ -17,9 +12,7 @@ import { useAtomFamilyStateValue } from '@/ui/utilities/state/jotai/hooks/useAto
 import { useNavigateSettings } from '~/hooks/useNavigateSettings';
 
 export const NavigationDrawerOtherSection = () => {
-  const { t } = useLingui();
   const navigateSettings = useNavigateSettings();
-  const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
 
   const { toggleNavigationSection } = useNavigationSection('Other');
   const isNavigationSectionOpen = useAtomFamilyStateValue(
@@ -35,7 +28,7 @@ export const NavigationDrawerOtherSection = () => {
     <NavigationDrawerSection>
       <NavigationDrawerAnimatedCollapseWrapper>
         <NavigationDrawerSectionTitle
-          label={t`Other`}
+          label="Помощь"
           onClick={toggleNavigationSection}
           isOpen={isNavigationSectionOpen}
         />
@@ -48,15 +41,13 @@ export const NavigationDrawerOtherSection = () => {
         initial={false}
       >
         <NavigationDrawerItem
-          label={t`Settings`}
+          label="Настройки профиля"
           Icon={IconSettings}
           onClick={handleSettingsClick}
         />
         <NavigationDrawerItem
-          label={t`Documentation`}
-          to={getDocumentationUrl({
-            locale: currentWorkspaceMember?.locale,
-          })}
+          label="Помощь Onla"
+          to="https://onla-ai.ru/dashboard"
           Icon={IconHelpCircle}
         />
       </AnimatedExpandableContainer>
