@@ -238,11 +238,7 @@ export class OnlaBootstrapWorkspaceService {
       await this.signInUpService.signUpOnNewWorkspaceForOnlaProvisioning(
         {
           type: 'existingUser',
-          // Zero-runtime cast: `owner` (UserEntity) carries every field
-          // FlatAuthContextUser (Pick<FlatUser>) selects, but the entity and
-          // the flat type don't structurally align for tsc. Runtime is
-          // unaffected (provisioning is verified in prod).
-          existingUser: owner as unknown as FlatAuthContextUser,
+          existingUser: owner,
         },
         {
           displayName: payload.client_name,
@@ -251,7 +247,11 @@ export class OnlaBootstrapWorkspaceService {
       );
 
     await this.workspaceService.activateWorkspace(
-      owner,
+      // Zero-runtime cast: activateWorkspace types its first arg as
+      // AuthContextUser (Pick<FlatUser>); `owner` (UserEntity) carries all
+      // those fields at runtime (provisioning verified in prod) but the entity
+      // and the flat type don't structurally align for tsc.
+      owner as unknown as FlatAuthContextUser,
       workspace,
       {
         displayName: payload.client_name,
