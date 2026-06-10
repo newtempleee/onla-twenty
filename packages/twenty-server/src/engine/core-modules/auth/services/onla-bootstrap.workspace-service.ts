@@ -481,7 +481,8 @@ export class OnlaBootstrapWorkspaceService {
       throw new BadRequestException('Invalid scheduled_at');
     }
     const durationMin =
-      typeof payload.duration_minutes === 'number' && payload.duration_minutes > 0
+      typeof payload.duration_minutes === 'number' &&
+      payload.duration_minutes > 0
         ? payload.duration_minutes
         : 30;
     const endsAt = new Date(startsAt.getTime() + durationMin * 60_000);
@@ -522,7 +523,14 @@ export class OnlaBootstrapWorkspaceService {
              description = $6,
              "updatedAt" = now()
          where id = $1`,
-        [existing[0].id, title, startsAt.toISOString(), endsAt.toISOString(), isCanceled, description],
+        [
+          existing[0].id,
+          title,
+          startsAt.toISOString(),
+          endsAt.toISOString(),
+          isCanceled,
+          description,
+        ],
       );
 
       return existing[0].id;
@@ -539,7 +547,14 @@ export class OnlaBootstrapWorkspaceService {
         "iCalUid"
       ) values ($1, $2, false, $3, $4, $5, $6)
       returning id`,
-      [title, isCanceled, startsAt.toISOString(), endsAt.toISOString(), description, iCalUid],
+      [
+        title,
+        isCanceled,
+        startsAt.toISOString(),
+        endsAt.toISOString(),
+        description,
+        iCalUid,
+      ],
     );
 
     return inserted[0].id;

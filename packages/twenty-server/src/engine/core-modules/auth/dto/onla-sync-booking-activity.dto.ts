@@ -1,9 +1,4 @@
-import {
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 /**
  * Payload for POST /onla/bootstrap/booking-activity.
