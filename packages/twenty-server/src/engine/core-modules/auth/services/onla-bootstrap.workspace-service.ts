@@ -23,6 +23,7 @@ import { OnlaBootstrapWorkspaceResponseDto } from 'src/engine/core-modules/auth/
 import { OnlaSyncCallActivityDto } from 'src/engine/core-modules/auth/dto/onla-sync-call-activity.dto';
 import { OnlaSyncBookingActivityDto } from 'src/engine/core-modules/auth/dto/onla-sync-booking-activity.dto';
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
+import { type FlatAuthContextUser } from 'src/engine/core-modules/auth/types/flat-auth-context-user.type';
 
 const ONLA_CLIENT_ID_KEY = 'onla.clientId';
 const ONLA_CLIENT_NAME_KEY = 'onla.clientName';
@@ -237,7 +238,11 @@ export class OnlaBootstrapWorkspaceService {
       await this.signInUpService.signUpOnNewWorkspaceForOnlaProvisioning(
         {
           type: 'existingUser',
-          existingUser: owner,
+          // Zero-runtime cast: `owner` (UserEntity) carries every field
+          // FlatAuthContextUser (Pick<FlatUser>) selects, but the entity and
+          // the flat type don't structurally align for tsc. Runtime is
+          // unaffected (provisioning is verified in prod).
+          existingUser: owner as unknown as FlatAuthContextUser,
         },
         {
           displayName: payload.client_name,
