@@ -486,7 +486,9 @@ export class OnlaBootstrapWorkspaceService {
         : 30;
     const endsAt = new Date(startsAt.getTime() + durationMin * 60_000);
     const isCanceled =
-      payload.status === 'cancelled' || payload.status === 'declined';
+      payload.status === 'cancelled' ||
+      payload.status === 'declined' ||
+      payload.status === 'rescheduled';
     const service = payload.service?.trim();
     const title = (service ? `Запись: ${service}` : 'Запись на приём').slice(
       0,
