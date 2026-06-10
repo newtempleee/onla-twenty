@@ -14,6 +14,7 @@ import { timingSafeEqual } from 'crypto';
 import { OnlaBootstrapWorkspaceDto } from 'src/engine/core-modules/auth/dto/onla-bootstrap-workspace.dto';
 import { OnlaBootstrapWorkspaceResponseDto } from 'src/engine/core-modules/auth/dto/onla-bootstrap-workspace-response.dto';
 import { OnlaSyncCallActivityDto } from 'src/engine/core-modules/auth/dto/onla-sync-call-activity.dto';
+import { OnlaSyncBookingActivityDto } from 'src/engine/core-modules/auth/dto/onla-sync-booking-activity.dto';
 import { OnlaBootstrapWorkspaceService } from 'src/engine/core-modules/auth/services/onla-bootstrap.workspace-service';
 import { PublicEndpointGuard } from 'src/engine/guards/public-endpoint.guard';
 import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
@@ -46,6 +47,18 @@ export class OnlaBootstrapController {
     this.assertAuthorized(authorizationHeader);
 
     return await this.onlaBootstrapService.syncCallActivity(payload);
+  }
+
+  @Post('booking-activity')
+  @HttpCode(200)
+  @UseGuards(PublicEndpointGuard, NoPermissionGuard)
+  async syncBookingActivity(
+    @Headers('authorization') authorizationHeader: string | undefined,
+    @Body() payload: OnlaSyncBookingActivityDto,
+  ) {
+    this.assertAuthorized(authorizationHeader);
+
+    return await this.onlaBootstrapService.syncBookingActivity(payload);
   }
 
   private assertAuthorized(authorizationHeader: string | undefined) {

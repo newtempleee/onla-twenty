@@ -21,6 +21,7 @@ import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.ent
 import { OnlaBootstrapWorkspaceDto } from 'src/engine/core-modules/auth/dto/onla-bootstrap-workspace.dto';
 import { OnlaBootstrapWorkspaceResponseDto } from 'src/engine/core-modules/auth/dto/onla-bootstrap-workspace-response.dto';
 import { OnlaSyncCallActivityDto } from 'src/engine/core-modules/auth/dto/onla-sync-call-activity.dto';
+import { OnlaSyncBookingActivityDto } from 'src/engine/core-modules/auth/dto/onla-sync-booking-activity.dto';
 import { SignInUpService } from 'src/engine/core-modules/auth/services/sign-in-up.service';
 
 const ONLA_CLIENT_ID_KEY = 'onla.clientId';
@@ -331,6 +332,288 @@ export class OnlaBootstrapWorkspaceService {
       throw error;
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  async syncBookingActivity(payload: OnlaSyncBookingActivityDto) {
+    const workspace = await this.findWorkspaceByOnlaClientId(
+      payload.onla_client_id,
+    );
+
+    if (!workspace) {
+      throw new BadRequestException('Onla CRM workspace was not found');
+    }
+    if (workspace.activationStatus !== WorkspaceActivationStatus.ACTIVE) {
+      throw new BadRequestException('Onla CRM workspace is not active');
+    }
+    if (!workspace.databaseSchema) {
+      throw new BadRequestException('Onla CRM workspace schema is not ready');
+    }
+
+    const schema = this.quoteIdentifier(workspace.databaseSchema);
+    const phone = this.parsePhone(payload.caller_phone);
+    const displayPhone = payload.caller_phone?.trim() || 'без номера';
+    // calendarEvent.iCalUid is the idempotency key — repeated pushes for the
+    // same appointment update the one event instead of duplicating it.
+    const iCalUid = `onla-booking:${payload.onla_appointment_id}`;
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const personId = await this.upsertBookingPerson(
+        queryRunner,
+        schema,
+        phone,
+        payload.caller_name ?? null,
+        displayPhone,
+      );
+      const eventId = await this.upsertBookingCalendarEvent(
+        queryRunner,
+        schema,
+        iCalUid,
+        payload,
+        displayPhone,
+      );
+      await this.ensureCalendarEventParticipant(
+        queryRunner,
+        schema,
+        eventId,
+        personId,
+        payload,
+        displayPhone,
+      );
+
+      await queryRunner.commitTransaction();
+
+      return {
+        status: 'ok',
+        workspace_id: workspace.id,
+        workspace_slug: workspace.subdomain,
+        person_id: personId,
+        calendar_event_id: eventId,
+        booking_status: payload.status ?? null,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Person upsert by phone — same shape as upsertCallerPerson but driven by the
+  // booking payload (kept separate so the call-sync path stays untouched).
+  private async upsertBookingPerson(
+    queryRunner: QueryRunner,
+    schema: string,
+    phone: {
+      callingCode: string | null;
+      countryCode: string | null;
+      number: string | null;
+    },
+    callerName: string | null,
+    displayPhone: string,
+  ): Promise<string> {
+    const name = callerName?.trim() || `Клиент ${displayPhone}`.slice(0, 120);
+
+    if (phone.callingCode && phone.number) {
+      const existing = await queryRunner.query(
+        `select id from ${schema}.person
+         where "deletedAt" is null
+           and "phonesPrimaryPhoneCallingCode" = $1
+           and "phonesPrimaryPhoneNumber" = $2
+         limit 1`,
+        [phone.callingCode, phone.number],
+      );
+
+      if (existing[0]?.id) {
+        await queryRunner.query(
+          `update ${schema}.person
+           set "updatedAt" = now(), "updatedByName" = $2
+           where id = $1`,
+          [existing[0].id, ONLA_CREATED_BY],
+        );
+
+        return existing[0].id;
+      }
+    }
+
+    const inserted = await queryRunner.query(
+      `insert into ${schema}.person (
+        "nameFirstName",
+        "nameLastName",
+        "phonesPrimaryPhoneNumber",
+        "phonesPrimaryPhoneCountryCode",
+        "phonesPrimaryPhoneCallingCode",
+        "phonesAdditionalPhones",
+        "jobTitle",
+        "createdByName",
+        "updatedByName"
+      ) values ($1, '', $2, $3, $4, '[]'::jsonb, $5, $6, $6)
+      returning id`,
+      [
+        name,
+        phone.number,
+        phone.countryCode,
+        phone.callingCode,
+        'Клиент Onla',
+        ONLA_CREATED_BY,
+      ],
+    );
+
+    return inserted[0].id;
+  }
+
+  // Insert/update the Twenty calendarEvent for this booking, keyed by iCalUid.
+  // Cancelled/declined bookings stay on the calendar but are marked canceled.
+  private async upsertBookingCalendarEvent(
+    queryRunner: QueryRunner,
+    schema: string,
+    iCalUid: string,
+    payload: OnlaSyncBookingActivityDto,
+    displayPhone: string,
+  ): Promise<string> {
+    const startsAt = new Date(payload.scheduled_at);
+
+    if (Number.isNaN(startsAt.getTime())) {
+      throw new BadRequestException('Invalid scheduled_at');
+    }
+    const durationMin =
+      typeof payload.duration_minutes === 'number' &&
+      payload.duration_minutes > 0
+        ? payload.duration_minutes
+        : 30;
+    const endsAt = new Date(startsAt.getTime() + durationMin * 60_000);
+    const isCanceled =
+      payload.status === 'cancelled' ||
+      payload.status === 'declined' ||
+      payload.status === 'rescheduled';
+    const service = payload.service?.trim();
+    const title = (service ? `Запись: ${service}` : 'Запись на приём').slice(
+      0,
+      200,
+    );
+    const description = [
+      service ? `Услуга: ${service}` : null,
+      `Клиент: ${displayPhone}`,
+      payload.status ? `Статус: ${this.bookingStatusRu(payload.status)}` : null,
+      payload.onla_appointment_link
+        ? `Onla: ${payload.onla_appointment_link}`
+        : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const existing = await queryRunner.query(
+      `select id from ${schema}."calendarEvent"
+       where "deletedAt" is null and "iCalUid" = $1
+       limit 1`,
+      [iCalUid],
+    );
+
+    if (existing[0]?.id) {
+      await queryRunner.query(
+        `update ${schema}."calendarEvent"
+         set title = $2,
+             "startsAt" = $3,
+             "endsAt" = $4,
+             "isCanceled" = $5,
+             description = $6,
+             "updatedAt" = now()
+         where id = $1`,
+        [
+          existing[0].id,
+          title,
+          startsAt.toISOString(),
+          endsAt.toISOString(),
+          isCanceled,
+          description,
+        ],
+      );
+
+      return existing[0].id;
+    }
+
+    const inserted = await queryRunner.query(
+      `insert into ${schema}."calendarEvent" (
+        title,
+        "isCanceled",
+        "isFullDay",
+        "startsAt",
+        "endsAt",
+        description,
+        "iCalUid"
+      ) values ($1, $2, false, $3, $4, $5, $6)
+      returning id`,
+      [
+        title,
+        isCanceled,
+        startsAt.toISOString(),
+        endsAt.toISOString(),
+        description,
+        iCalUid,
+      ],
+    );
+
+    return inserted[0].id;
+  }
+
+  // Link the caller person to the event so it shows on the contact's Calendar
+  // tab (the per-record timeline joins calendarEventParticipant.personId).
+  private async ensureCalendarEventParticipant(
+    queryRunner: QueryRunner,
+    schema: string,
+    calendarEventId: string,
+    personId: string,
+    payload: OnlaSyncBookingActivityDto,
+    displayPhone: string,
+  ) {
+    const existing = await queryRunner.query(
+      `select id from ${schema}."calendarEventParticipant"
+       where "deletedAt" is null
+         and "calendarEventId" = $1 and "personId" = $2
+       limit 1`,
+      [calendarEventId, personId],
+    );
+
+    if (existing[0]?.id) {
+      return existing[0].id;
+    }
+
+    const handle = payload.caller_phone?.trim() || displayPhone;
+    const displayName = payload.caller_name?.trim() || displayPhone;
+    const inserted = await queryRunner.query(
+      `insert into ${schema}."calendarEventParticipant" (
+        "calendarEventId",
+        "personId",
+        handle,
+        "displayName",
+        "isOrganizer",
+        "responseStatus"
+      ) values ($1, $2, $3, $4, false, 'ACCEPTED')
+      returning id`,
+      [calendarEventId, personId, handle, displayName],
+    );
+
+    return inserted[0].id;
+  }
+
+  private bookingStatusRu(status: string): string {
+    switch (status) {
+      case 'confirmed':
+        return 'подтверждено';
+      case 'pending_confirmation':
+        return 'ждёт подтверждения';
+      case 'cancelled':
+        return 'отменено';
+      case 'declined':
+        return 'отклонено';
+      case 'rescheduled':
+        return 'перенесено';
+      default:
+        return status;
     }
   }
 
